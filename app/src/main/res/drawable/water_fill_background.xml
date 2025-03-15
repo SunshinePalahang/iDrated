@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Water container (empty space, representing the bottle) -->
+    <item android:left="0dp" android:right="0dp" android:top="0dp" android:bottom="0dp">
+        <shape>
+            <solid android:color="@color/colorBackgroundWater" /> <!-- Background color (container) -->
+            <corners android:radius="0dp" />
+        </shape>
+    </item>
+
+    <!-- Water filling (this will be animated vertically) -->
+    <item android:left="0dp" android:right="0dp" android:top="0dp" android:bottom="0dp">
+        <clip>
+            <shape>
+                <solid android:color="@color/colorPrimary" /> <!-- Water color -->
+            </shape>
+        </clip>
+    </item>
+</layer-list>

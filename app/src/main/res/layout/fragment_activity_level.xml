@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dp">
+
+    <!-- Caption TextView to display the activity level selection prompt -->
+    <TextView
+        android:id="@+id/activityCaptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select your activity level:"
+        android:textColor="@android:color/black"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="@font/poppins" />
+
+    <!-- ImageView to display an image -->
+    <ImageView
+        android:id="@+id/activityImageView"
+        android:layout_width="match_parent"
+        android:layout_height="325dp"
+        android:src="@drawable/highly"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="20dp" />
+
+    <!-- TextView for the description of the selected activity level -->
+    <TextView
+        android:id="@+id/activityDescriptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:layout_marginBottom="10dp"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/poppins" />
+
+    <!-- Button Group 1: Sedentary and Lightly Active -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="5dp">
+
+        <!-- Sedentary Button -->
+        <Button
+            android:id="@+id/sedentaryButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/colorPrimary"
+            android:fontFamily="@font/poppins"
+            android:text="Sedentary"
+            android:layout_marginEnd="10dp" />
+
+        <!-- Lightly Active Button -->
+        <Button
+            android:id="@+id/lightlyActiveButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Lightly Active"
+            android:fontFamily="@font/poppins"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
+    <!-- Button Group 2: Moderately Active and Highly Active -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <!-- Moderately Active Button -->
+        <Button
+            android:id="@+id/moderateActivityButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Moderately Active"
+            android:fontFamily="@font/poppins"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_marginEnd="10dp" />
+
+        <!-- Highly Active Button -->
+        <Button
+            android:id="@+id/highlyActiveButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Highly Active"
+            android:fontFamily="@font/poppins"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
+</LinearLayout>

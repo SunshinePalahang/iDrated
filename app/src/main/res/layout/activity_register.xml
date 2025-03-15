@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RegisterActivity"
+    android:background="#87CEEB">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/registerTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:text="Create an Account"
+                android:textSize="24sp"
+                android:textColor="#87CEEB"
+                android:textStyle="bold"
+                android:fontFamily="@font/poppins" />
+
+            <!-- Email Input with Icon on the Right -->
+            <LinearLayout
+                android:id="@+id/registerEmailContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registerTitle"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/registerEmailInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Email"
+                    android:backgroundTint="#87CEEB"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/poppins" />
+
+                <ImageView
+                    android:id="@+id/registerEmailIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="10dp"
+                    android:contentDescription="Email Icon"
+                    android:src="@drawable/email_icon" />
+            </LinearLayout>
+
+            <!-- Password Input with Icon on the Right and Visibility Toggle -->
+            <LinearLayout
+                android:id="@+id/registerPasswordContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registerEmailContainer"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/registerPasswordInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Password"
+                    android:backgroundTint="#87CEEB"
+                    android:textColor="#000000"
+                    android:inputType="textPassword"
+                    android:fontFamily="@font/poppins" />
+
+                <ImageView
+                    android:id="@+id/registerPasswordVisibilityToggle"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="10dp"
+                    android:contentDescription="Toggle Password Visibility"
+                    android:src="@drawable/ic_visibility_off" />
+            </LinearLayout>
+
+            <!-- Confirm Password Input with Icon on the Right and Visibility Toggle -->
+            <LinearLayout
+                android:id="@+id/confirmPasswordContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registerPasswordContainer"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/confirmPasswordInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Confirm Password"
+                    android:backgroundTint="#87CEEB"
+                    android:textColor="#000000"
+                    android:inputType="textPassword"
+                    android:fontFamily="@font/poppins" />
+
+                <ImageView
+                    android:id="@+id/confirmPasswordVisibilityToggle"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="10dp"
+                    android:contentDescription="Toggle Confirm Password Visibility"
+                    android:src="@drawable/ic_visibility_off" />
+            </LinearLayout>
+
+            <!-- Agree to Terms and Conditions -->
+            <LinearLayout
+                android:id="@+id/termsAndConditionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/confirmPasswordContainer"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/termsCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="I agree to the"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/poppins" />
+
+                <TextView
+                    android:id="@+id/termsLinkText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Terms and Conditions"
+                    android:textColor="#006bb3"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/poppins"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_alignParentEnd="true" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/termsAndConditionsContainer"
+                android:layout_marginTop="30dp"
+                android:backgroundTint="#006bb3"
+                android:text="Register"
+                android:textColor="#FFFFFF"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:id="@+id/loginLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/registerButton"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:text="Already have an account? Login"
+                android:textColor="#006bb3"
+                android:textSize="16sp"
+                android:fontFamily="@font/poppins" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

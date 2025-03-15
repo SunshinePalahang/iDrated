@@ -1,0 +1,349 @@
+package samples
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.idrated.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+class ActivityLevelSelectionActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_level_selection)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+        val btnSedentary = findViewById<Button>(R.id.btnSedentary)
+        val btnLightlyActive = findViewById<Button>(R.id.btnLightlyActive)
+        val btnModeratelyActive = findViewById<Button>(R.id.btnModeratelyActive)
+        val btnVeryActive = findViewById<Button>(R.id.btnVeryActive)
+
+        btnSedentary.setOnClickListener {
+            updateWaterGoal("Sedentary", 0)
+        }
+
+        btnLightlyActive.setOnClickListener {
+            updateWaterGoal("Lightly Active", 250)
+        }
+
+        btnModeratelyActive.setOnClickListener {
+            updateWaterGoal("Moderately Active", 500)
+        }
+
+        btnVeryActive.setOnClickListener {
+            updateWaterGoal("Very Active", 750)
+        }
+    }
+
+    private fun updateWaterGoal(activityLevel: String, additionalWater: Int) {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val currentWaterGoal = document.getLong("waterGoal")?.toInt() ?: 0
+                        val newWaterGoal = currentWaterGoal + additionalWater
+
+                        // Update the water goal in Firestore
+                        db.collection("users").document(userId)
+                            .update("waterGoal", newWaterGoal, "activityLevel", activityLevel)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Activity level saved!", Toast.LENGTH_SHORT).show()
+
+                                // Navigate to SetGoalActivity
+                                val intent = Intent(this, WeatherConditionActivity::class.java)
+                                startActivity(intent)
+                                finish() // Finish the current activity
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Failed to update water goal", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to retrieve user data", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+package samples
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.idrated.databinding.ActivityAgeSelectionBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+class AgeSelectionActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private lateinit var binding: ActivityAgeSelectionBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityAgeSelectionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+        // Create age list from 1 to 150
+        val ageList = (1..150).map { it.toString() }.toList()
+
+        // Set up a spinner (dropdown) for age selection
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ageList)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.ageSpinner.adapter = adapter
+
+        // Set up the button to save age to Firestore and navigate to the next page
+        binding.btnSaveAge.setOnClickListener {
+            val selectedAge = binding.ageSpinner.selectedItem.toString().toInt()
+
+            saveAgeAndNavigate(selectedAge)
+        }
+    }
+
+    // Function to save age to Firestore and navigate to SetGoalActivity
+    private fun saveAgeAndNavigate(age: Int) {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            // Set the age in Firestore for the current user
+            db.collection("users").document(userId)
+                .update("age", age)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Age saved successfully!", Toast.LENGTH_SHORT).show()
+
+                    // Navigate to SetGoalActivity
+                    val intent = Intent(this, ActivityLevelSelectionActivity::class.java)  // Ensure Intent is properly used here
+                    startActivity(intent)
+                    finish() // Finish AgeSelectionActivity
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to save age", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+package samples
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.idrated.databinding.ActivityGenderSelectionBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+class GenderSelectionActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private lateinit var binding: ActivityGenderSelectionBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityGenderSelectionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+        // Male Button Click Listener
+        binding.btnMale.setOnClickListener {
+            setWaterGoalAndNavigate(3700, "Male")
+        }
+
+        // Female Button Click Listener
+        binding.btnFemale.setOnClickListener {
+            setWaterGoalAndNavigate(2700, "Female")
+        }
+    }
+
+    // Function to set water goal based on gender and navigate to SetGoalActivity
+    private fun setWaterGoalAndNavigate(goal: Int, gender: String) {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            // Set the water goal and gender in Firestore for the current user
+            db.collection("users").document(userId)
+                .update(
+                    "waterGoal", goal,
+                    "waterConsumed", 0,
+                    "gender", gender // Save gender to Firestore
+                )
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Gender set successfully!", Toast.LENGTH_SHORT).show()
+
+                    // Navigate to SetGoalActivity
+                    val intent = Intent(this, AgeSelectionActivity::class.java)
+                    startActivity(intent)
+                    finish() // Finish GenderSelectionActivity
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to set water goal and gender", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+package samples
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.idrated.GoalActivity
+import com.example.idrated.databinding.ActivitySetGoalBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+class SetGoalActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private lateinit var binding: ActivitySetGoalBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize view binding
+        binding = ActivitySetGoalBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Initialize Firebase instances
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+
+        binding.btnSkip.setOnClickListener {
+            val intent = Intent(this, GoalActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Set click listener for the Save Goal button
+        binding.btnSaveGoal.setOnClickListener {
+            val goalInput = binding.etGoalInput.text.toString().toIntOrNull()
+
+            if (goalInput != null && goalInput > 0) {
+                saveWaterGoal(goalInput)
+            } else {
+                Toast.makeText(this, "Please enter a valid goal", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun saveWaterGoal(goal: Int) {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            db.collection("users").document(userId)
+                .update("waterGoal", goal, "waterConsumed", 0) // Reset consumed water to 0
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Goal saved successfully!", Toast.LENGTH_SHORT).show()
+
+                    // Navigate back to GoalActivity
+                    val intent = Intent(this, GoalActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to save goal", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+package samples
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.idrated.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+class WeatherConditionActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_weather_condition)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+        // Initialize buttons from the XML layout
+        findViewById<Button>(R.id.btn_hot).setOnClickListener {
+            updateWaterGoal(500, "Hot")
+        }
+
+        findViewById<Button>(R.id.btn_temperate).setOnClickListener {
+            updateWaterGoal(500, "Temperate")
+        }
+
+        findViewById<Button>(R.id.btn_cold).setOnClickListener {
+            updateWaterGoal(0, "Cold")
+        }
+    }
+
+    private fun updateWaterGoal(addition: Int, weatherCondition: String) {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val currentGoal = document.getLong("waterGoal")?.toInt() ?: 0
+                        val newGoal = currentGoal + addition
+
+                        db.collection("users").document(userId)
+                            .update(mapOf("waterGoal" to newGoal, "weatherCondition" to weatherCondition))
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Weather Condition Saved!", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, SetGoalActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Failed to update water goal", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to retrieve user data", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+}

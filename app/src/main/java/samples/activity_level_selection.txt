@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ADD8E6"
+    tools:context="samples.ActivityLevelSelectionActivity">
+
+    <TextView
+        android:id="@+id/activityLevelTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Your Activity Level"
+        android:textSize="24sp"
+        android:textColor="#00008B"
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btnSedentary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sedentary"
+        android:textSize="18sp"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="16dp"
+        android:backgroundTint="#00008B"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/activityLevelTitle"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btnLightlyActive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lightly Active"
+        android:textSize="18sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:backgroundTint="#00008B"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/btnSedentary"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btnModeratelyActive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Moderately Active"
+        android:textSize="18sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:backgroundTint="#00008B"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/btnLightlyActive"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btnVeryActive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Very Active"
+        android:textSize="18sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:backgroundTint="#00008B"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/btnModeratelyActive"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

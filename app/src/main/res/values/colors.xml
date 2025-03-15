@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorBackgroundWater">#E0F7FA</color>
+    <color name="colorPrimary">#0097A7</color>
+    <color name="colorProgressWater">#00ACC1</color>
+
+    <color name="colorAccent">#084D68</color>
+    <color name="colorDisable">#D3D3D3</color>
+    <color name="boxBackgroundColor">#005c66</color>
+    <color name="boxBackgroundColor2">#007380</color>
+    <color name="darkerBackgroundColor">#91e2ed</color>
+    <color name="mainBG">#98B9F2</color>
+    <color name="button">#4c8acd</color>
+    <color name="buttonDarker">#306BAC</color>
+    #306BAC
+
+    <color name="transparent">#00000000</color>
+
+
+</resources>

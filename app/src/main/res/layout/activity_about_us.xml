@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAF5FF"
+    tools:context=".AboutUsActivity">
+
+    <!-- CardView to wrap the entire content -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <!-- ScrollView inside the CardView -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header Container -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="9dp" >
+
+                    <!-- Back Button -->
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/backButton"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@color/darkerBackgroundColor"
+                        android:gravity="center"
+                        android:text="&lt;"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        android:backgroundTint="@color/buttonDarker"
+                        android:contentDescription="@null"
+                        android:layout_marginEnd="-45dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="About Us"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="0dp"
+                        android:textColor="#000000"
+                        android:fontFamily="@font/poppins" />
+                </LinearLayout>
+
+                <!-- Content -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:fontFamily="@font/poppins"
+                    android:paddingTop="16dp"
+                    android:justificationMode="inter_word"
+                    android:text="     Welcome to iDrated! At iDrated, we believe that staying hydrated is essential for a healthier and more productive lifestyle. Our mission is to make hydration easier and smarter for everyone by blending technology with personal care." />
+
+                <!-- Section: Who We Are -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Who We Are"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingTop="16dp"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/poppins" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="     We are CodeYLucks, a team of passionate students from the Polytechnic University of the Philippines, united by our dedication to creating innovative solutions for everyday challenges. iDrated is our vision brought to life—an app that not only tracks your water intake but also motivates and reminds you to stay on top of your hydration goals."
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="#000000"
+                    android:justificationMode="inter_word"
+                    android:fontFamily="@font/poppins" />
+
+                <!-- Section: Our Team -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Our Team"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingTop="16dp"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/poppins" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="     Behind iDrated is a hardworking and talented group of individuals:\n\n- Denise Ira Jubilo\n- Jelen Kriz Angel Mampusti\n- Justen Nicanor\n- Sunshine Richmer Palahang\n\nEach of us brings unique strengths and perspectives to the table, allowing us to craft an app that’s not only functional but also user-friendly and impactful."
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="#000000"
+                    android:justificationMode="inter_word"
+                    android:fontFamily="@font/poppins" />
+
+                <!-- Section: Our Commitment -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Our Commitment"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingTop="16dp"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/poppins" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="     As students, we understand the challenges of balancing health and a busy schedule. iDrated was designed with this in mind—to serve as your hydration companion, wherever life takes you. We are committed to improving our app continuously and to listening to the needs of our users."
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="#000000"
+                    android:justificationMode="inter_word"
+                    android:fontFamily="@font/poppins" />
+
+                <!-- Section: Thank You -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="     Thank you for joining us on this journey. Let’s stay hydrated and healthy together!"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="#000000"
+                    android:justificationMode="inter_word"
+                    android:fontFamily="@font/poppins"
+                    android:paddingTop="16dp" />
+
+                <!-- Section: Contact Us -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="     Feel free to share feedback, suggestions, or just say hi at codeylucks@gmail.com."
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="#000000"
+                    android:justificationMode="inter_word"
+                    android:fontFamily="@font/poppins"
+                    android:paddingTop="16dp" />
+
+                <!-- Footer -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="— The iDrated Team"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="#000000"
+                    android:justificationMode="inter_word"
+                    android:fontFamily="@font/poppins"
+                    android:paddingTop="16dp" />
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/logo_codeylucks" />
+
+            </LinearLayout>
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

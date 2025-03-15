@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#87CEEB"
+    tools:context=".TandCActivity">
+
+    <!-- CardView to wrap the entire content -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <!-- ScrollView inside the CardView -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header Container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- Back Button -->
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/backButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@color/darkerBackgroundColor"
+                    android:gravity="center"
+                    android:text="&lt;"
+                    android:textColor="#000000"
+                    android:textSize="24sp"
+                    android:contentDescription="@null"
+                    android:layout_marginEnd="75dp" />
+
+                <!-- ImageView -->
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_app" />"
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Terms and Conditions"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:paddingBottom="16dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <!-- Effective Date -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Effective Date: January 2025"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp" />
+
+            <!-- Content -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:fontFamily="@font/poppins"
+                android:justificationMode="inter_word"
+                android:text="Welcome to iDrated! These Terms and Conditions (&quot;Terms&quot;) govern your use of the iDrated mobile application (&quot;App&quot;) and its services. By creating an account or using the App, you agree to these Terms. Please read them carefully.\n\n---\n\n" />
+
+            <!-- Section 1 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1. Acceptance of Terms"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By accessing or using the App, you confirm that you are at least 15 years old and capable of entering into a legally binding agreement. If you do not agree to these Terms, you must discontinue using the App immediately."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+
+            <!-- Section 2 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2. User Responsibilities"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="You agree to:\n\n- Provide accurate and up-to-date information, including age, gender, email, password, activity level, and water intake data.\n- Maintain the confidentiality of your account credentials and notify us immediately if you suspect unauthorized use of your account.\n- Use the App for personal, non-commercial purposes only."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Add other sections -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3. Data Collection and Use"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="To provide personalized hydration recommendations and monitor your water intake in real time, we collect the following data:\n\n- Personal Information: Age, gender, email, and password.\n- Activity Level: Information about your daily physical activity.\n- Water Intake Data: Real-time tracking of your water consumption.\n\nYour data is processed in accordance with our Privacy Policy."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 4 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="4. Account Creation and Security"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- You must create an account to access certain features of the App.\n- It is your responsibility to ensure your password is secure. We are not liable for any unauthorized access resulting from your failure to secure your account."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 5 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="5. Disclaimer"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="The App is intended for informational purposes only. It does not provide medical advice or diagnoses. Always consult a healthcare professional for specific hydration or health needs."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 6 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="6. Prohibited Conduct"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- Use the App in any unlawful or harmful manner.\n- Provide false or misleading information.\n- Attempt to interfere with the proper functioning of the App or its security features."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 7 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="7. Intellectual Property"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="All content, features, and functionality of the App, including but not limited to text, graphics, logos, and software, are owned by iDrated or its licensors and are protected by intellectual property laws. You may not reproduce, modify, or distribute any content without prior written consent."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 8 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="8. Termination"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="We reserve the right to suspend or terminate your account at any time if you violate these Terms or engage in any prohibited conduct."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 9 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="9. Limitation of Liability"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="To the maximum extent permitted by law, iDrated is not liable for any direct, indirect, incidental, or consequential damages arising from your use of the App."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 10 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="10. Modifications to Terms"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="We may update these Terms from time to time. Continued use of the App after changes are made constitutes your acceptance of the revised Terms."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 11 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="11. Governing Law"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="These Terms are governed by the laws of the Philippines/NCR. Any disputes will be resolved in accordance with the laws of this jurisdiction."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <!-- Section 12 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="12. Contact Us"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="If you have any questions about these Terms, please contact us at codeylucks@gmail.com."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By using the iDrated App, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions."
+                android:textSize="16sp"
+                android:lineSpacingExtra="8dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/poppins"
+                android:paddingBottom="16dp"
+                android:justificationMode="inter_word"/>
+
+        </LinearLayout>
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
