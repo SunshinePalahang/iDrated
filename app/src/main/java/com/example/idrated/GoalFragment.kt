@@ -200,7 +200,6 @@ class GoalFragment : Fragment() {
     }
 
     private fun calculateHydration(temperature: Double) {
-
         val age = this.age
         val gender = this.gender
         val activityLevel = this.activityLevel
@@ -220,68 +219,76 @@ class GoalFragment : Fragment() {
             val MODERATELY_ACTIVE = 500
             val VERY_ACTIVE = 750
 
-            var recommendedWaterIntake = when {
-                age in 1..8 -> WATER_GOAL_CHILD_4_8
-                age in 9..18 -> {
-                    when (gender) {
-                        "Male" -> if (age <= 13) WATER_GOAL_BOYS_9_13 else WATER_GOAL_BOYS_14_18
-                        "Female" -> if (age <= 13) WATER_GOAL_GIRLS_9_13 else WATER_GOAL_GIRLS_14_18
-                        else -> 0
-                    }
-                }
-                age in 19..64 -> {
-                    when (gender) {
-                        "Male" -> WATER_GOAL_MEN_ADULT
-                        "Female" -> WATER_GOAL_WOMEN_ADULT
-                        else -> 0
-                    }
-                }
-                age >= 65 -> {
-                    when (gender) {
-                        "Male" -> WATER_GOAL_OLDER_MEN
-                        "Female" -> WATER_GOAL_OLDER_WOMEN
-                        else -> 0
-                    }
-                }
-                else -> 0
-            }
-
-            recommendedWaterIntake += when (activityLevel) {
-                "Sedentary" -> 0
-                "Lightly Active" -> LIGHTLY_ACTIVE
-                "Moderately Active" -> MODERATELY_ACTIVE
-                "Highly Active" -> VERY_ACTIVE
-                else -> 0
-            }
-            if (temperature >= 30.0) {
-                recommendedWaterIntake += 500
-            }
             val auth = FirebaseAuth.getInstance()
             val userId = auth.currentUser?.uid
             if (userId != null) {
                 val realtimeDatabase = FirebaseDatabase.getInstance().reference
                 val userRef = realtimeDatabase.child("users").child(userId)
 
-                userRef.runTransaction(object : Transaction.Handler {
-                    override fun doTransaction(currentData: MutableData): Transaction.Result {
-                        val currentWaterGoal = currentData.child("waterGoal").getValue(Double::class.java) ?: 0.0
-                        val newWaterGoal = recommendedWaterIntake
-                        currentData.child("waterGoal").value = newWaterGoal
-                        return Transaction.success(currentData)
-                    }
+                userRef.child("healthCondition").get().addOnSuccessListener { snapshot ->
+                    val hasHealthCondition = snapshot.getValue(Boolean::class.java) ?: false
+                    var recommendedWaterIntake = 2000 // Default to 2L if user has a health condition
 
-                    override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
-                        if (committed) {
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to save water goal: ${error?.message}", Toast.LENGTH_SHORT).show()
+                    if (!hasHealthCondition) {
+                        recommendedWaterIntake = when {
+                            age in 1..8 -> WATER_GOAL_CHILD_4_8
+                            age in 9..18 -> {
+                                when (gender) {
+                                    "Male" -> if (age <= 13) WATER_GOAL_BOYS_9_13 else WATER_GOAL_BOYS_14_18
+                                    "Female" -> if (age <= 13) WATER_GOAL_GIRLS_9_13 else WATER_GOAL_GIRLS_14_18
+                                    else -> 0
+                                }
+                            }
+                            age in 19..64 -> {
+                                when (gender) {
+                                    "Male" -> WATER_GOAL_MEN_ADULT
+                                    "Female" -> WATER_GOAL_WOMEN_ADULT
+                                    else -> 0
+                                }
+                            }
+                            age >= 65 -> {
+                                when (gender) {
+                                    "Male" -> WATER_GOAL_OLDER_MEN
+                                    "Female" -> WATER_GOAL_OLDER_WOMEN
+                                    else -> 0
+                                }
+                            }
+                            else -> 0
+                        }
+
+                        recommendedWaterIntake += when (activityLevel) {
+                            "Sedentary" -> 0
+                            "Lightly Active" -> LIGHTLY_ACTIVE
+                            "Moderately Active" -> MODERATELY_ACTIVE
+                            "Highly Active" -> VERY_ACTIVE
+                            else -> 0
+                        }
+
+                        if (temperature >= 30.0) {
+                            recommendedWaterIntake += 500
                         }
                     }
-                })
+
+                    userRef.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(currentData: MutableData): Transaction.Result {
+                            currentData.child("waterGoal").value = recommendedWaterIntake
+                            return Transaction.success(currentData)
+                        }
+
+                        override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
+                            if (!committed) {
+                                Toast.makeText(requireContext(), "Failed to save water goal: ${error?.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    })
+                }
             } else {
                 Toast.makeText(requireContext(), "User is not authenticated", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
+
 
     private fun checkBluetoothState() {
         if (bluetoothAdapter == null) {

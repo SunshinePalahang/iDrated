@@ -3,7 +3,10 @@ package com.example.idrated
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
@@ -31,27 +34,28 @@ class HealthConditionFragment : Fragment(R.layout.fragment_health_condition) {
         // Hide disclaimer initially
         textDisclaimer.visibility = View.GONE
 
-        radioGroup.setOnCheckedChangeListener { _, checkedId ->
-            if (checkedId == R.id.radioYes) {
-                textDisclaimer.visibility = View.VISIBLE
-                saveHealthConditionToDatabase(true)
-            } else if (checkedId == R.id.radioNo) {
-                textDisclaimer.visibility = View.GONE
-                saveHealthConditionToDatabase(false)
-            }
+        radioYes.setOnClickListener {
+            textDisclaimer.visibility = View.VISIBLE
+            onboardingActivity.markPageAsInteracted(4) // Assuming page 2 is health condition input
+            saveHealthConditionToDatabase(true)
+        }
+
+        radioNo.setOnClickListener {
+            textDisclaimer.visibility = View.GONE
+            onboardingActivity.markPageAsInteracted(4)
+            saveHealthConditionToDatabase(false)
         }
     }
+
+    // Function to handle button appearance
+
 
     // Save health condition status to Firebase Database
     private fun saveHealthConditionToDatabase(hasCondition: Boolean) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
-        if (uid != null) {
-            val database = FirebaseDatabase.getInstance()
-            val userRef = database.getReference("users/$uid")
 
-            val waterIntake = if (hasCondition) "2L" else "Personalized"
-            userRef.child("healthCondition").setValue(hasCondition)
-            userRef.child("recommendedWaterIntake").setValue(waterIntake)
+        if (uid != null) {
+            FirebaseDatabase.getInstance().getReference("users").child(uid).child("healthCondition").setValue(hasCondition)
                 .addOnSuccessListener {
                     // Successfully saved
                 }

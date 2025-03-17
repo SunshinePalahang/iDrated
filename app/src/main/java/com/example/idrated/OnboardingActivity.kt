@@ -32,7 +32,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         nextButton.setOnClickListener {
             val currentItem = viewPager.currentItem
-            if (currentItem < 4) { // Updated to include the last fragment
+            if (currentItem < 5) { // Updated to include the last fragment
                 onSaveListener?.invoke() // Notify the fragment to save data
                 viewPager.currentItem = currentItem + 1
                 updateButtonState(currentItem + 1)
@@ -65,13 +65,13 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         // Initialize interaction states for all pages
-        for (i in 0..3) userInputStates[i] = false // Require interaction on pages 0-3
-        userInputStates[4] = true // Mark the last page as already interacted
+        for (i in 0..4) userInputStates[i] = false // Require interaction on pages 0-3
+        userInputStates[5] = true // Mark the last page as already interacted
     }
 
     private fun updateButtonState(currentPage: Int) {
         backButton.isEnabled = currentPage > 0
-        nextButton.text = if (currentPage == 4) "Get Started" else ">"
+        nextButton.text = if (currentPage == 5) "Get Started" else ">"
         nextButton.isEnabled = userInputStates[currentPage] == true
     }
 
