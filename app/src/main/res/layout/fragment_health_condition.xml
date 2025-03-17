@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dp">
+
+    <!-- Caption TextView -->
+    <TextView
+        android:id="@+id/healthCaptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Do you have any health conditions that affect hydration?"
+        android:textColor="@android:color/black"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="@font/poppins" />
+
+    <!-- ImageView -->
+    <ImageView
+        android:id="@+id/healthImageView"
+        android:layout_width="match_parent"
+        android:layout_height="325dp"
+        android:src="@drawable/highly"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Health Condition Radio Group -->
+    <RadioGroup
+        android:id="@+id/radioGroupHealth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioYes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Yes"
+            android:fontFamily="@font/poppins"
+            android:textSize="18sp"
+            android:layout_marginEnd="20dp" />
+
+        <RadioButton
+            android:id="@+id/radioNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No"
+            android:fontFamily="@font/poppins"
+            android:textSize="18sp" />
+    </RadioGroup>
+
+    <!-- Disclaimer Text -->
+    <TextView
+        android:id="@+id/textDisclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Due to your health condition, we recommend a standard intake of 2L. Please consult a doctor for personalized advice."
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_red_dark"
+        android:fontFamily="@font/poppins"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"/>
+
+
+</LinearLayout>

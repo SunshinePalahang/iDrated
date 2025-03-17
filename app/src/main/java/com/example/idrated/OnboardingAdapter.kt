@@ -15,6 +15,7 @@ class OnboardingAdapter(activity: FragmentActivity) : FragmentStateAdapter(activ
             1 -> AgeInputFragment()
             2 -> GenderInputFragment()
             3 -> ActivityLevelFragment()
+            4 -> HealthConditionFragment()
             else -> HydrationTipFragment() // Last step
         }
     }
