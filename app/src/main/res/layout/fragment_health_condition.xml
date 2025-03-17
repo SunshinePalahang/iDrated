@@ -24,7 +24,7 @@
         android:id="@+id/healthImageView"
         android:layout_width="match_parent"
         android:layout_height="325dp"
-        android:src="@drawable/highly"
+        android:src="@drawable/health"
         android:scaleType="centerCrop"
         android:layout_marginBottom="20dp" />
 
