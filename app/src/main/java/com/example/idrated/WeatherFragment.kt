@@ -19,6 +19,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -140,6 +142,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
                         updateWeatherUI(temperature, description, humidity, locationName)
                         saveWeatherToCache(temperature, description, humidity, locationName)
+                        saveWeatherToFirebase(temperature)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
@@ -209,5 +212,20 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 100
+    }
+    private fun saveWeatherToFirebase(temperature: Double) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (userId != null) {
+            val weatherData = mapOf(
+                "temperature" to temperature,
+            )
+
+            FirebaseDatabase.getInstance().getReference("users").child(userId).updateChildren(weatherData)
+                .addOnSuccessListener {
+                }
+                .addOnFailureListener { e ->
+                }
+        }
     }
 }
