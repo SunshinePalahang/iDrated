@@ -38,9 +38,11 @@ import java.util.*
 
 class GoalFragment : Fragment() {
     // User Data
+    private var username: String? = null
     private var age: Int? = null
     private var gender: String? = null
     private var activityLevel: String? = null
+    private var temperature: Int? = null
 
     // Weather API
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -164,7 +166,7 @@ class GoalFragment : Fragment() {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Exception: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Offline Mode", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -187,15 +189,27 @@ class GoalFragment : Fragment() {
     }
 
     private fun getUserDataFromDatabase() {
+        val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        // Load locally stored data first
+        username = sharedPrefs.getString("username", null)
+
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
 
         userRef.get().addOnSuccessListener { snapshot ->
-            age = snapshot.child("age").getValue(Int::class.java)
-            gender = snapshot.child("gender").getValue(String::class.java)
-            activityLevel = snapshot.child("activityLevel").getValue(String::class.java)
+            username = snapshot.child("username").getValue(String::class.java) ?: username
+            age = snapshot.child("age").getValue(Int::class.java) ?: age
+            gender = snapshot.child("gender").getValue(String::class.java) ?: gender
+            activityLevel = snapshot.child("activityLevel").getValue(String::class.java) ?: activityLevel
+            temperature = snapshot.child("temperature").getValue(Int::class.java) ?: temperature
+
+            // Save to SharedPreferences for offline access
+            with(sharedPrefs.edit()) {
+                putString("username", username)
+                apply()
+            }
         }.addOnFailureListener {
-            Toast.makeText(requireContext(), "Failed to fetch user data.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Offline Mode: Using stored data", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -203,6 +217,7 @@ class GoalFragment : Fragment() {
         val age = this.age
         val gender = this.gender
         val activityLevel = this.activityLevel
+
 
         if (age != null && gender != null && activityLevel != null) {
             val WATER_GOAL_MEN_ADULT = 3700
@@ -268,7 +283,6 @@ class GoalFragment : Fragment() {
                             recommendedWaterIntake += 500
                         }
                     }
-
                     userRef.runTransaction(object : Transaction.Handler {
                         override fun doTransaction(currentData: MutableData): Transaction.Result {
                             currentData.child("waterGoal").value = recommendedWaterIntake

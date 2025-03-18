@@ -73,6 +73,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fetchUserData() {
+        val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+
+        // Load offline data first
+        loadUserDataFromPreferences()
+
         val currentUser = auth.currentUser
         if (currentUser != null) {
             val userId = currentUser.uid
@@ -83,22 +88,34 @@ class MainActivity : AppCompatActivity() {
                     val storedUsername = snapshot.child("username").value?.toString() ?: "User"
                     val storedProfileAvatarResId = snapshot.child("profile_avatar_res_id").value?.toString()?.toIntOrNull()
 
-                    // Set the username
-                    findViewById<TextView>(R.id.username).text = storedUsername
+                    // Save fetched data in SharedPreferences
+                    val editor = sharedPreferences.edit()
+                    editor.putString("username", storedUsername)
+                    storedProfileAvatarResId?.let { editor.putInt("profile_avatar_res_id", it) }
+                    editor.apply()
 
-                    // Set the profile image
-                    val profileIcon = findViewById<ImageView>(R.id.profile_icon)
-                    if (storedProfileAvatarResId != null) {
-                        profileIcon.setImageResource(storedProfileAvatarResId)
-                    } else {
-                        profileIcon.setImageResource(R.drawable.dflt_user)
-                    }
+                    // Update UI
+                    updateUserData(storedUsername, storedProfileAvatarResId)
                 }
-            }.addOnFailureListener { error ->
-                Log.e("MainActivity", "Error fetching user data: ${error.message}")
+            }.addOnFailureListener {
+                Log.e("MainActivity", "Error fetching user data: ${it.message}")
             }
         }
     }
+
+    private fun loadUserDataFromPreferences() {
+        val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", "User") ?: "User"
+        val profileAvatarResId = sharedPreferences.getInt("profile_avatar_res_id", R.drawable.dflt_user)
+
+        updateUserData(username, profileAvatarResId)
+    }
+    private fun updateUserData(username: String, avatarResId: Int?) {
+        findViewById<TextView>(R.id.username).text = username
+        val profileIcon = findViewById<ImageView>(R.id.profile_icon)
+        profileIcon.setImageResource(avatarResId ?: R.drawable.dflt_user)
+    }
+
 
     private fun updateNavigationIcons(selectedItemId: Int) {
         binding.bottomNavigation.menu.findItem(R.id.nav_weather).setIcon(R.drawable.weather1)
