@@ -2,8 +2,11 @@ package com.example.idrated
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -35,19 +38,18 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private lateinit var tvTime: TextView
 
     private val apiKey = "5756d076b5a3f5039968a7e610d3c11c"
+    private val handler = Handler(Looper.getMainLooper())
 
-    private val handler = Handler(Looper.getMainLooper()) // Handler to update UI on the main thread
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
-            displayCurrentDateTime() // Update time and date
-            handler.postDelayed(this, 1000) // Repeat every second
+            displayCurrentDateTime()
+            handler.postDelayed(this, 1000)
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize views
         tvTemperature = view.findViewById(R.id.tvTemperature)
         tvDescription = view.findViewById(R.id.tvDescription)
         tvHumidity = view.findViewById(R.id.tvHumidity)
@@ -56,27 +58,20 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         tvDate = view.findViewById(R.id.tvDate)
         tvTime = view.findViewById(R.id.tvTime)
 
-        // Initialize location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        // Display the current time and date immediately
         displayCurrentDateTime()
-
-        // Start updating the time every second
         handler.post(updateTimeRunnable)
 
-        // Check location permissions
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissions(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         } else {
-            getLocationAndWeather()
+            fetchWeather()
         }
     }
 
@@ -86,8 +81,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         val currentDate = sdfDate.format(Date())
         val currentTime = sdfTime.format(Date())
 
-        tvDate.text = "$currentDate"
-        tvTime.text = "$currentTime"
+        tvDate.text = currentDate
+        tvTime.text = currentTime
     }
 
     override fun onRequestPermissionsResult(
@@ -96,10 +91,20 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            getLocationAndWeather()
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            fetchWeather()
         } else {
             Toast.makeText(requireContext(), "Permission denied, cannot fetch weather.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun fetchWeather() {
+        if (isInternetAvailable()) {
+            getLocationAndWeather()
+        } else {
+            loadCachedWeather()
         }
     }
 
@@ -107,9 +112,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private fun getLocationAndWeather() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             if (location != null) {
-                val latitude = location.latitude
-                val longitude = location.longitude
-                fetchWeatherData(latitude, longitude)
+                fetchWeatherData(location.latitude, location.longitude)
             } else {
                 Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_SHORT).show()
             }
@@ -134,7 +137,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                         val description = it.weather.firstOrNull()?.description ?: "No description"
                         val humidity = it.main.humidity
                         val locationName = it.name
+
                         updateWeatherUI(temperature, description, humidity, locationName)
+                        saveWeatherToCache(temperature, description, humidity, locationName)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
@@ -151,7 +156,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         humidity: Int,
         locationName: String
     ) {
-        tvTemperature.text = "$temperature°C"
+        val formattedTemp = String.format("%.2f", temperature)
+        tvTemperature.text = "$formattedTemp°C"
         tvDescription.text = description
         tvHumidity.text = "Humidity: $humidity%"
         tvLocation.text = locationName
@@ -165,9 +171,40 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         }
     }
 
+
+    private fun saveWeatherToCache(temperature: Double, description: String, humidity: Int, locationName: String) {
+        val sharedPreferences = requireContext().getSharedPreferences("weather_prefs", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putFloat("temperature", temperature.toFloat())
+            putString("description", description)
+            putInt("humidity", humidity)
+            putString("location", locationName)
+            apply()
+        }
+    }
+
+    private fun loadCachedWeather() {
+        val sharedPreferences = requireContext().getSharedPreferences("weather_prefs", Context.MODE_PRIVATE)
+        val temperature = sharedPreferences.getFloat("temperature", Float.MIN_VALUE)
+        val description = sharedPreferences.getString("description", null)
+        val humidity = sharedPreferences.getInt("humidity", Int.MIN_VALUE)
+        val locationName = sharedPreferences.getString("location", null)
+
+        if (temperature != Float.MIN_VALUE && description != null && humidity != Int.MIN_VALUE && locationName != null) {
+            updateWeatherUI(temperature.toDouble(), description, humidity, locationName)
+        }
+    }
+
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacks(updateTimeRunnable) // Stop updating when the view is destroyed
+        handler.removeCallbacks(updateTimeRunnable)
     }
 
     companion object {
