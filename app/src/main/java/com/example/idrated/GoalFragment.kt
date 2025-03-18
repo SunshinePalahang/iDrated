@@ -308,10 +308,10 @@ class GoalFragment : Fragment() {
 
     private fun checkAndRequestPermissions() {
         val permissions = arrayOf(
-            android.Manifest.permission.BLUETOOTH,
-            android.Manifest.permission.BLUETOOTH_ADMIN,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-            android.Manifest.permission.BLUETOOTH_SCAN
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN
         )
 
         val missingPermissions = permissions.filter {
@@ -412,11 +412,22 @@ class GoalFragment : Fragment() {
                     if (bytesRead != null && bytesRead > 0) {
                         val receivedData = String(buffer, 0, bytesRead).trim()
                         handler.post {
-                            binding.receivedDataTextView.text = "Received: $receivedData"
+                            if (binding != null && isAdded && context != null) {
+                                binding.receivedDataTextView.text = "Received: $receivedData"
+                            } else {
+                                Log.e("Bluetooth", "Fragment not attached, skipping UI update.")
+                                return@post
+                            }
+
                             val waterIntake = receivedData.toDoubleOrNull()
-                            if (waterIntake != null && waterIntake > 0) {
-                                addToWaterConsumed(waterIntake) // This updates waterConsumed, but not the goal
-                                updateWaterConsumed(waterIntake) // Add this line to update the goal!
+                            if (waterIntake == null) {
+                                Log.e("Bluetooth", "Invalid data received: $receivedData")
+                                return@post
+                            }
+
+                            if (waterIntake > 0) {
+                                addToWaterConsumed(waterIntake)
+                                updateWaterConsumed(waterIntake) // Make sure to remove this if it's unnecessary
                             }
                         }
                     }
