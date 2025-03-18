@@ -292,8 +292,6 @@ class GoalFragment : Fragment() {
         }
     }
 
-
-
     private fun checkBluetoothState() {
         if (bluetoothAdapter == null) {
             Toast.makeText(requireContext(), "Bluetooth not supported on this device", Toast.LENGTH_SHORT).show()
@@ -417,7 +415,8 @@ class GoalFragment : Fragment() {
                             binding.receivedDataTextView.text = "Received: $receivedData"
                             val waterIntake = receivedData.toDoubleOrNull()
                             if (waterIntake != null && waterIntake > 0) {
-                                addToWaterConsumed(waterIntake)
+                                addToWaterConsumed(waterIntake) // This updates waterConsumed, but not the goal
+                                updateWaterConsumed(waterIntake) // Add this line to update the goal!
                             }
                         }
                     }
@@ -461,8 +460,8 @@ class GoalFragment : Fragment() {
                     currentData.child("waterConsumed").value = newConsumed
                     currentData.child("lastSavedTime").value = System.currentTimeMillis()
 
-                    updateWaterConsumed(newConsumed)
-                    getLocationAndWeather() //for reset
+                    // ✅ Add the intake to the history correctly here
+                    saveIndividualIntake(waterIntake)
 
                     return Transaction.success(currentData)
                 }
@@ -481,6 +480,8 @@ class GoalFragment : Fragment() {
                     }
                 }
             })
+        } else {
+            Toast.makeText(requireContext(), "User not authenticated", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -515,7 +516,7 @@ class GoalFragment : Fragment() {
         val userRef = realtimeDatabase.child("users").child(userId)
         userRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                currentData.child("waterGoal").value = recommendedWaterIntake
+                currentData.child("waterGoal").value = recommendedWaterIntake // ❗️ This might be the issue
                 return Transaction.success(currentData)
             }
 
@@ -526,10 +527,38 @@ class GoalFragment : Fragment() {
                     Toast.makeText(requireContext(), "Water goal updated successfully.", Toast.LENGTH_SHORT).show()
 
                     // Call saveWaterIntake() after setting the goal
-                    saveWaterIntake(recommendedWaterIntake.toDouble())
+                    saveWaterIntake(newConsumed)
                 }
             }
         })
+    }
+
+    private fun saveIndividualIntake(waterAmount: Double) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val userRef = FirebaseDatabase.getInstance().getReference("users/$userId")
+            val historyRef = userRef.child("history")
+
+            // Timestamp and date formatting
+            val timestamp = System.currentTimeMillis()
+            val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
+
+            // Create a history item for the individual intake
+            val historyItem = HistoryItem(
+                dateTime = formattedDate,
+                waterIntake = waterAmount // ✅ Save only the individual amount here
+            )
+
+            // Save this intake as a new history entry
+            historyRef.child(timestamp.toString()).setValue(historyItem)
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Water intake recorded successfully in history.")
+                }
+                .addOnFailureListener {
+                    Log.e("Firebase", "Failed to save history entry: ${it.message}")
+                    Toast.makeText(context, "Failed to save history!", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 
     private fun saveWaterIntake(waterAmount: Double) {
