@@ -159,6 +159,7 @@ class GoalFragment : Fragment() {
                         }
 
                         calculateHydration(temperature)
+                        saveWeatherToFirebase(temperature)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
@@ -166,6 +167,29 @@ class GoalFragment : Fragment() {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Exception: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    private fun saveWeatherToFirebase(temperature: Double) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (userId != null) {
+            val sdfDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val sdfTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            val currentDate = sdfDate.format(Date())
+            val currentTime = sdfTime.format(Date())
+
+            val weatherData = mapOf(
+                "temperature" to temperature,
+                "date" to currentDate,
+                "time" to currentTime
+            )
+
+            val database = FirebaseDatabase.getInstance().getReference("users").child(userId).child("weather")
+            database.setValue(weatherData)
+                .addOnSuccessListener {
+                }
+                .addOnFailureListener { e ->
+                }
         }
     }
 
