@@ -35,6 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.database.FirebaseDatabase
 
 class GoalFragment : Fragment() {
     // User Data
@@ -62,6 +63,10 @@ class GoalFragment : Fragment() {
     // Binding
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
+
+    //Hydration Goal
+    private var recommendedWaterIntake = 2000 // Default to 2L if user has a health condition
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -227,7 +232,6 @@ class GoalFragment : Fragment() {
 
                 userRef.child("healthCondition").get().addOnSuccessListener { snapshot ->
                     val hasHealthCondition = snapshot.getValue(Boolean::class.java) ?: false
-                    var recommendedWaterIntake = 2000 // Default to 2L if user has a health condition
 
                     if (!hasHealthCondition) {
                         recommendedWaterIntake = when {
@@ -511,32 +515,65 @@ class GoalFragment : Fragment() {
         val userRef = realtimeDatabase.child("users").child(userId)
         userRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val currentGoal = currentData.child("waterGoal").getValue(Double::class.java) ?: 0.0
-                currentData.child("waterConsumed").value = newConsumed
+                currentData.child("waterGoal").value = recommendedWaterIntake
                 return Transaction.success(currentData)
             }
 
-            override fun onComplete(
-                error: DatabaseError?,
-                committed: Boolean,
-                snapshot: DataSnapshot?
-            ) {
+            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
                 if (error != null) {
-                    Toast.makeText(requireContext(), "Failed to update water intake: ${error.message}", Toast.LENGTH_SHORT).show()
-                    Log.e("Firebase", "Transaction failed: ${error.message}")
-                } else if (committed) {
-                    val goal = snapshot?.child("waterGoal")?.getValue(Double::class.java) ?: 0.0
-                    updateGoalDisplay(goal, newConsumed)
-                    Toast.makeText(requireContext(), "Water intake updated!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Failed to update water goal.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Water goal updated successfully.", Toast.LENGTH_SHORT).show()
+
+                    // Call saveWaterIntake() after setting the goal
+                    saveWaterIntake(recommendedWaterIntake.toDouble())
                 }
             }
         })
     }
 
+    private fun saveWaterIntake(waterAmount: Double) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val userRef = FirebaseDatabase.getInstance().getReference("users/$userId")
+
+            // Save updated waterConsumed and waterGoal if needed
+            userRef.child("waterConsumed").setValue(waterAmount)
+
+            // Save to history correctly
+            val historyRef = userRef.child("history")
+
+            val timestamp = System.currentTimeMillis()
+            val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
+
+            val historyItem = HistoryItem(
+                dateTime = formattedDate,
+                waterIntake = waterAmount
+            )
+
+            // Push new history entry
+            historyRef.child(timestamp.toString()).setValue(historyItem)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Water intake recorded successfully!", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Failed to save history!", Toast.LENGTH_SHORT).show()
+                }
+
+            // Remove lastSavedTime (optional)
+            userRef.child("lastSavedTime").removeValue()
+        }
+    }
+
     private fun closeBluetoothConnection() {
-        inputStream?.close()
-        bluetoothSocket?.close()
-        isConnected = false
+        try {
+            inputStream?.close()
+            bluetoothSocket?.close()
+            isConnected = false
+            binding.deviceNameTextView.text = "Disconnected"
+        } catch (e: Exception) {
+            Log.e("Bluetooth", "Error closing connection: ${e.message}")
+        }
     }
 
     override fun onDestroyView() {
