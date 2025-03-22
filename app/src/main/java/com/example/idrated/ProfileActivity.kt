@@ -1,13 +1,7 @@
 package com.example.idrated
 
 import android.os.Bundle
-import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
@@ -23,6 +17,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var ageInput: EditText
     private lateinit var genderSpinner: Spinner
     private lateinit var activityLevelSpinner: Spinner
+    private lateinit var urineCheckSpinner: Spinner
     private lateinit var saveButton: Button
     private lateinit var changeAvatarButton: Button
     private lateinit var backButton: AppCompatTextView
@@ -40,19 +35,11 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        // Initialize views
         initializeViews()
-
-        // Fetch user data from Firebase
         fetchUserData()
 
-        // Back button logic
         backButton.setOnClickListener { finish() }
-
-        // Save button logic
         saveButton.setOnClickListener { saveUserData() }
-
-        // Change avatar button logic
         changeAvatarButton.setOnClickListener { showAvatarSelectionDialog() }
     }
 
@@ -62,6 +49,7 @@ class ProfileActivity : AppCompatActivity() {
         ageInput = findViewById(R.id.age_input)
         genderSpinner = findViewById(R.id.gender_input)
         activityLevelSpinner = findViewById(R.id.activity_level_input)
+        urineCheckSpinner = findViewById(R.id.urine_check_input) // Added urine check spinner
         saveButton = findViewById(R.id.save_button)
         changeAvatarButton = findViewById(R.id.change_avatar_button)
         backButton = findViewById(R.id.backButton)
@@ -69,14 +57,17 @@ class ProfileActivity : AppCompatActivity() {
         // Initialize spinners
         val genderOptions = arrayOf("Male", "Female")
         val activityLevelOptions = arrayOf("Sedentary", "Lightly Active", "Moderately Active", "Highly Active")
+        val urineCheckOptions = arrayOf("Well-hydrated", "Slightly Dehydrated", "Dehydrated")
 
-        val genderAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, genderOptions)
-        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        genderSpinner.adapter = genderAdapter
+        genderSpinner.adapter = createSpinnerAdapter(genderOptions)
+        activityLevelSpinner.adapter = createSpinnerAdapter(activityLevelOptions)
+        urineCheckSpinner.adapter = createSpinnerAdapter(urineCheckOptions)
+    }
 
-        val activityLevelAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, activityLevelOptions)
-        activityLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        activityLevelSpinner.adapter = activityLevelAdapter
+    private fun createSpinnerAdapter(options: Array<String>): ArrayAdapter<String> {
+        return ArrayAdapter(this, android.R.layout.simple_spinner_item, options).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
     }
 
     private fun fetchUserData() {
@@ -84,23 +75,31 @@ class ProfileActivity : AppCompatActivity() {
             val userRef = database.child("users").child(user.uid)
             userRef.get().addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
-                    usernameInput.setText(snapshot.child("username").value.toString())
-                    ageInput.setText(snapshot.child("age").value.toString())
+                    usernameInput.setText(snapshot.child("username").value?.toString() ?: "")
+                    ageInput.setText(snapshot.child("age").value?.toString() ?: "")
 
-                    val gender = snapshot.child("gender").value.toString()
-                    genderSpinner.setSelection((genderSpinner.adapter as ArrayAdapter<String>).getPosition(gender))
+                    val gender = snapshot.child("gender").value?.toString()
+                    gender?.let { setSpinnerSelection(genderSpinner, it) }
 
-                    val activityLevel = snapshot.child("activityLevel").value.toString()
-                    activityLevelSpinner.setSelection((activityLevelSpinner.adapter as ArrayAdapter<String>).getPosition(activityLevel))
+                    val activityLevel = snapshot.child("activityLevel").value?.toString()
+                    activityLevel?.let { setSpinnerSelection(activityLevelSpinner, it) }
 
-                    val avatarResId = snapshot.child("profile_avatar_res_id").value?.toString()?.toIntOrNull()
-                    if (avatarResId != null) {
-                        selectedAvatarResId = avatarResId
-                        profileImageView.setImageResource(avatarResId)
-                    } else {
-                        profileImageView.setImageResource(R.drawable.dflt_user)
-                    }
+                    val urineCheck = snapshot.child("urineCheck").value?.toString()
+                    urineCheck?.let { setSpinnerSelection(urineCheckSpinner, it) }
+
+                    selectedAvatarResId = snapshot.child("profile_avatar_res_id").value?.toString()?.toIntOrNull()
+                    profileImageView.setImageResource(selectedAvatarResId ?: R.drawable.dflt_user)
                 }
+            }
+        }
+    }
+
+    private fun setSpinnerSelection(spinner: Spinner, value: String) {
+        val adapter = spinner.adapter as? ArrayAdapter<String>
+        adapter?.let {
+            val position = it.getPosition(value)
+            if (position >= 0) {
+                spinner.setSelection(position)
             }
         }
     }
@@ -119,6 +118,7 @@ class ProfileActivity : AppCompatActivity() {
             "age" to age,
             "gender" to genderSpinner.selectedItem.toString(),
             "activityLevel" to activityLevelSpinner.selectedItem.toString(),
+            "urineCheck" to urineCheckSpinner.selectedItem.toString(),
             "profile_avatar_res_id" to (selectedAvatarResId ?: R.drawable.dflt_user)
         )
 
