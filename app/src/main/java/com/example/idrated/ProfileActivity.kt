@@ -18,6 +18,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var genderSpinner: Spinner
     private lateinit var activityLevelSpinner: Spinner
     private lateinit var urineCheckSpinner: Spinner
+    private lateinit var healthConditionTextView: TextView // Read-only Health Condition
     private lateinit var saveButton: Button
     private lateinit var changeAvatarButton: Button
     private lateinit var backButton: AppCompatTextView
@@ -49,12 +50,12 @@ class ProfileActivity : AppCompatActivity() {
         ageInput = findViewById(R.id.age_input)
         genderSpinner = findViewById(R.id.gender_input)
         activityLevelSpinner = findViewById(R.id.activity_level_input)
-        urineCheckSpinner = findViewById(R.id.urine_check_input) // Added urine check spinner
+        urineCheckSpinner = findViewById(R.id.urine_check_input)
+        healthConditionTextView = findViewById(R.id.health_condition_text) // Read-only TextView
         saveButton = findViewById(R.id.save_button)
         changeAvatarButton = findViewById(R.id.change_avatar_button)
         backButton = findViewById(R.id.backButton)
 
-        // Initialize spinners
         val genderOptions = arrayOf("Male", "Female")
         val activityLevelOptions = arrayOf("Sedentary", "Lightly Active", "Moderately Active", "Highly Active")
         val urineCheckOptions = arrayOf("Well-hydrated", "Slightly Dehydrated", "Dehydrated")
@@ -86,6 +87,9 @@ class ProfileActivity : AppCompatActivity() {
 
                     val urineCheck = snapshot.child("urineCheck").value?.toString()
                     urineCheck?.let { setSpinnerSelection(urineCheckSpinner, it) }
+
+                    val healthCondition = snapshot.child("healthCondition").value?.toString()?.toBoolean()
+                    healthConditionTextView.text = if (healthCondition == true) "Yes" else "No" // Set read-only health status
 
                     selectedAvatarResId = snapshot.child("profile_avatar_res_id").value?.toString()?.toIntOrNull()
                     profileImageView.setImageResource(selectedAvatarResId ?: R.drawable.dflt_user)

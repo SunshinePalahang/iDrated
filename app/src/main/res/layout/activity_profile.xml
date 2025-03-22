@@ -33,19 +33,18 @@
                 android:textStyle="bold"
                 android:padding="10dp"
                 android:fontFamily="@font/poppins" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Profile"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:fontFamily="@font/poppins" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="134dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/poppins"
+            android:gravity="center"
+            android:text="Profile"
+            android:textColor="#000000"
+            android:textSize="24sp"
+            android:textStyle="bold" />
         <ImageView
             android:id="@+id/profile_image_input"
             android:layout_width="100dp"
@@ -96,6 +95,35 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/health_condition_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/poppins"
+                android:text="Health Condition:"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/health_condition_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#EAF5FF"
+                android:fontFamily="@font/poppins"
+                android:padding="8dp"
+                android:text="Loading..."
+                android:textColor="#333333"
+                android:textSize="16sp" />
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/save_button"
