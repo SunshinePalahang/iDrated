@@ -99,7 +99,6 @@ class MainActivity : AppCompatActivity() {
                             apply()
                         }
                     }
-
                     editor.apply()
                     updateUserData(storedUsername, storedProfileAvatarResId)
                 }
