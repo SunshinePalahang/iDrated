@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popupContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -31,7 +32,7 @@
             android:backgroundTint="@color/urine_light"
             android:text="1"
             android:textColor="@android:color/black"
-            android:layout_margin="8dp"/> <!-- Use margin instead of gap -->
+            android:layout_margin="8dp"/>
 
         <Button
             android:id="@+id/lightButton"
@@ -50,7 +51,6 @@
             android:text="3"
             android:textColor="@android:color/black"
             android:layout_margin="8dp"/>
-
     </GridLayout>
 
     <ImageView

@@ -78,26 +78,6 @@ class UrineColorAnalysisFragment : Fragment(R.layout.fragment_urine_color_analys
         hydrationStatusTextView.text = statusText
         hydrationDescriptionTextView.text = descriptionText
         urineImageView.setImageResource(imageResId)
-
-        // Set selected button style
-        setButtonSelectedStyle(selectedButton)
-
-        // Reset styles for other buttons
-        listOf(veryLightButton, lightButton, mediumButton)
-            .filter { it != selectedButton }
-            .forEach { resetButtonStyle(it) }
-    }
-
-    private fun setButtonSelectedStyle(button: Button) {
-        button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
-        button.setTextColor(Color.WHITE)
-        button.elevation = 8f
-    }
-
-    private fun resetButtonStyle(button: Button) {
-        button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
-        button.setTextColor(Color.WHITE)
-        button.elevation = 2f
     }
 
     private fun saveUrineCheckToDatabase(status: String) {
@@ -114,5 +94,4 @@ class UrineColorAnalysisFragment : Fragment(R.layout.fragment_urine_color_analys
             Toast.makeText(requireContext(), "User not authenticated.", Toast.LENGTH_SHORT).show()
         }
     }
-
 }

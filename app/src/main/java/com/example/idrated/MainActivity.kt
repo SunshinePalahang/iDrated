@@ -1,13 +1,23 @@
 package com.example.idrated
 
 import SettingsFragment
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.idrated.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -89,13 +99,16 @@ class MainActivity : AppCompatActivity() {
                     val editor = sharedPreferences.edit()
                     editor.putString("username", storedUsername)
                     storedProfileAvatarResId?.let { editor.putInt("profile_avatar_res_id", it) }
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                    val lastSavedDate = sharedPreferences.getString("lastSavedDate", "")
 
-                    if (currentDate != lastSavedDate) {
+                    // Get the current time in "HH:mm" format
+                    val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                    val lastSavedTime = sharedPreferences.getString("lastSavedTime", "")
+
+                    if (currentTime != lastSavedTime) { // Resets every minute for testing
                         resetWaterConsumed()
+                        showUrineColorAnalysisPopup() // Show urine color analysis pop-up
                         with(editor) {
-                            putString("lastSavedDate", currentDate)
+                            putString("lastSavedTime", currentTime)
                             apply()
                         }
                     }
@@ -122,6 +135,61 @@ class MainActivity : AppCompatActivity() {
                 }
         }
     }
+
+    private fun showUrineColorAnalysisPopup() {
+        val context = this
+
+        val dialog = AlertDialog.Builder(context)
+            .setCancelable(false)
+            .create()
+
+        val inflater = LayoutInflater.from(context)
+        val layout = inflater.inflate(R.layout.urine_color_analysis_popup, null)
+
+        val hydrationStatusTextView = layout.findViewById<TextView>(R.id.hydrationStatusTextView)
+        val lightButton = layout.findViewById<Button>(R.id.lightButton)
+        val moderateButton = layout.findViewById<Button>(R.id.moderateButton)
+        val darkButton = layout.findViewById<Button>(R.id.darkButton)
+        val saveButton = layout.findViewById<Button>(R.id.saveButton)
+
+        var selectedStatus = ""
+
+        fun updateSelection(statusText: String) {
+            selectedStatus = statusText
+            hydrationStatusTextView.text = statusText
+            saveButton.isEnabled = true
+        }
+
+        lightButton.setOnClickListener { updateSelection("Well-hydrated") }
+        moderateButton.setOnClickListener { updateSelection("Slightly Dehydrated") }
+        darkButton.setOnClickListener { updateSelection("Dehydrated") }
+
+        saveButton.setOnClickListener {
+            saveUrineCheckToDatabase(selectedStatus)
+            dialog.dismiss()
+        }
+
+        dialog.setView(layout)
+        dialog.show()
+    }
+
+    private fun saveUrineCheckToDatabase(status: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (uid != null) {
+            val userRef = FirebaseDatabase.getInstance().getReference("users/$uid/urineCheck")
+            userRef.setValue(status)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Urine check saved successfully.", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Error saving urine check: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "User not authenticated.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     private fun loadUserDataFromPreferences() {
         val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)

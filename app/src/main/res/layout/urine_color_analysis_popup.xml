@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="40dp"
+    android:gravity="center"
+    android:background="@drawable/rounded_dialog_bg">
+
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Urine Color Analysis"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:paddingBottom="20dp"/>
+
+    <TextView
+        android:id="@+id/hydrationStatusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select your urine color"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@android:color/darker_gray"
+        android:paddingBottom="20dp"/>
+
+    <Button
+        android:id="@+id/lightButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Light Yellow"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@color/urine_light"
+        android:padding="10dp"/>
+
+    <Button
+        android:id="@+id/moderateButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Moderate Yellow"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@color/urine_moderate"
+        android:padding="10dp"/>
+
+    <Button
+        android:id="@+id/darkButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dark Yellow"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@color/urine_dark"
+        android:padding="10dp"/>
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_save_button"
+        android:enabled="false"
+        android:padding="10dp"/>
+</LinearLayout>
