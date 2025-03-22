@@ -42,7 +42,7 @@ class GoalFragment : Fragment() {
     private var age: Int? = null
     private var gender: String? = null
     private var activityLevel: String? = null
-    private var temperature: Int? = null
+
 
     // Weather API
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -65,6 +65,9 @@ class GoalFragment : Fragment() {
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
 
+    private var isHydrationCalculated = false
+    private var lastHydrationCalculationDate: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -77,7 +80,15 @@ class GoalFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        lastHydrationCalculationDate = sharedPrefs.getString("lastHydrationCalculationDate", null)
 
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        if (lastHydrationCalculationDate != currentDate) {
+            lastHydrationCalculationDate = currentDate
+            sharedPrefs.edit().putString("lastHydrationCalculationDate", currentDate).apply()
+            getLocationAndWeather()
+        }
         // Check location permissions
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -147,7 +158,10 @@ class GoalFragment : Fragment() {
                     val weather = response.body()
                     weather?.let {
                         val temperature = it.main.temp
-                        calculateHydration(temperature)
+                        if (!isHydrationCalculated) {
+                            calculateHydration(temperature)
+                            isHydrationCalculated = true  // Set the flag to true
+                        }
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
@@ -175,7 +189,6 @@ class GoalFragment : Fragment() {
             age = snapshot.child("age").getValue(Int::class.java) ?: age
             gender = snapshot.child("gender").getValue(String::class.java) ?: gender
             activityLevel = snapshot.child("activityLevel").getValue(String::class.java) ?: activityLevel
-            temperature = snapshot.child("temperature").getValue(Int::class.java) ?: temperature
 
             // Save to SharedPreferences for offline access
             with(sharedPrefs.edit()) {

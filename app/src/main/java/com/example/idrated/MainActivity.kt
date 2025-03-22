@@ -109,12 +109,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun resetWaterConsumed() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
+        showUrineColorAnalysisPopup()
         if (uid != null) {
             val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
-            showUrineColorAnalysisPopup()
+
             userRef.child("waterConsumed").setValue(0)
                 .addOnSuccessListener {
                     Toast.makeText(this@MainActivity, "Water consumption has been reset.", Toast.LENGTH_SHORT).show()
@@ -169,7 +169,6 @@ class MainActivity : AppCompatActivity() {
             val userRef = FirebaseDatabase.getInstance().getReference("users/$uid/urineCheck")
             userRef.setValue(status)
                 .addOnSuccessListener {
-                    Toast.makeText(this, "Restarting App", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "Error saving urine check: ${e.message}", Toast.LENGTH_SHORT).show()
