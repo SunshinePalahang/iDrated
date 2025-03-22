@@ -6,6 +6,7 @@ import android.os.Handler
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.idrated.databinding.ActivityMainBinding
@@ -74,8 +75,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchUserData() {
         val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-
-        // Load offline data first
         loadUserDataFromPreferences()
 
         val currentUser = auth.currentUser
@@ -87,19 +86,41 @@ class MainActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     val storedUsername = snapshot.child("username").value?.toString() ?: "User"
                     val storedProfileAvatarResId = snapshot.child("profile_avatar_res_id").value?.toString()?.toIntOrNull()
-
-                    // Save fetched data in SharedPreferences
                     val editor = sharedPreferences.edit()
                     editor.putString("username", storedUsername)
                     storedProfileAvatarResId?.let { editor.putInt("profile_avatar_res_id", it) }
-                    editor.apply()
+                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    val lastSavedDate = sharedPreferences.getString("lastSavedDate", "")
 
-                    // Update UI
+                    if (currentDate != lastSavedDate) {
+                        resetWaterConsumed()
+                        with(editor) {
+                            putString("lastSavedDate", currentDate)
+                            apply()
+                        }
+                    }
+
+                    editor.apply()
                     updateUserData(storedUsername, storedProfileAvatarResId)
                 }
             }.addOnFailureListener {
                 Log.e("MainActivity", "Error fetching user data: ${it.message}")
             }
+        }
+    }
+
+    private fun resetWaterConsumed() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
+
+            userRef.child("waterConsumed").setValue(0)
+                .addOnSuccessListener {
+                    Toast.makeText(this@MainActivity, "Water consumption has been reset.", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this@MainActivity, "Error resetting water consumption: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 

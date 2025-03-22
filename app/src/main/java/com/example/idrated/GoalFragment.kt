@@ -147,19 +147,6 @@ class GoalFragment : Fragment() {
                     val weather = response.body()
                     weather?.let {
                         val temperature = it.main.temp
-                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val currentDate = sdf.format(Date())
-                        val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-                        val lastSavedDate = sharedPrefs.getString("lastSavedDate", "")
-
-                        if (currentDate != lastSavedDate) {
-                            resetWaterConsumed()
-                            with(sharedPrefs.edit()) {
-                                putString("lastSavedDate", currentDate)
-                                apply()
-                            }
-                        }
-
                         calculateHydration(temperature)
                     }
                 } else {
@@ -169,19 +156,6 @@ class GoalFragment : Fragment() {
                 Toast.makeText(requireContext(), "Offline Mode", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun resetWaterConsumed() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
-        val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
-
-        userRef.child("waterConsumed").setValue(0)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Water consumption has been reset.", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(requireContext(), "Error resetting water consumption: ${exception.message}", Toast.LENGTH_SHORT).show()
-            }
     }
 
     companion object {
