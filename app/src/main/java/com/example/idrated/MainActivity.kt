@@ -1,23 +1,16 @@
 package com.example.idrated
 
 import SettingsFragment
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.idrated.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -80,9 +73,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        fetchUserData() // Fetch latest user data when activity resumes
+        fetchUserData()
     }
-
     private fun fetchUserData() {
         val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         loadUserDataFromPreferences()
@@ -99,16 +91,13 @@ class MainActivity : AppCompatActivity() {
                     val editor = sharedPreferences.edit()
                     editor.putString("username", storedUsername)
                     storedProfileAvatarResId?.let { editor.putInt("profile_avatar_res_id", it) }
+                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    val lastSavedDate = sharedPreferences.getString("lastSavedDate", "")
 
-                    // Get the current time in "HH:mm" format
-                    val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                    val lastSavedTime = sharedPreferences.getString("lastSavedTime", "")
-
-                    if (currentTime != lastSavedTime) { // Resets every minute for testing
+                    if (currentDate != lastSavedDate) {
                         resetWaterConsumed()
-                        showUrineColorAnalysisPopup() // Show urine color analysis pop-up
                         with(editor) {
-                            putString("lastSavedTime", currentTime)
+                            putString("lastSavedDate", currentDate)
                             apply()
                         }
                     }
@@ -125,7 +114,7 @@ class MainActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid != null) {
             val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
-
+            showUrineColorAnalysisPopup()
             userRef.child("waterConsumed").setValue(0)
                 .addOnSuccessListener {
                     Toast.makeText(this@MainActivity, "Water consumption has been reset.", Toast.LENGTH_SHORT).show()
@@ -180,7 +169,7 @@ class MainActivity : AppCompatActivity() {
             val userRef = FirebaseDatabase.getInstance().getReference("users/$uid/urineCheck")
             userRef.setValue(status)
                 .addOnSuccessListener {
-                    Toast.makeText(this, "Urine check saved successfully.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Restarting App", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "Error saving urine check: ${e.message}", Toast.LENGTH_SHORT).show()
