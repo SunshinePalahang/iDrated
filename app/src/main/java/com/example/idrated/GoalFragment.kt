@@ -137,8 +137,6 @@ class GoalFragment : Fragment() {
                 val latitude = location.latitude
                 val longitude = location.longitude
                 fetchWeatherData(latitude, longitude)
-            } else {
-                Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -19,8 +19,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -31,7 +29,7 @@ import java.util.*
 class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var tvTemperature: TextView
+    private lateinit var tvWeather: TextView
     private lateinit var tvDescription: TextView
     private lateinit var tvHumidity: TextView
     private lateinit var tvLocation: TextView
@@ -52,7 +50,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tvTemperature = view.findViewById(R.id.tvTemperature)
+        tvWeather = view.findViewById(R.id.tvWeather)
         tvDescription = view.findViewById(R.id.tvDescription)
         tvHumidity = view.findViewById(R.id.tvHumidity)
         tvLocation = view.findViewById(R.id.tvLocation)
@@ -133,15 +131,15 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             try {
                 val response = weatherApi.getWeather(latitude, longitude, apiKey)
                 if (response.isSuccessful) {
-                    val weather = response.body()
-                    weather?.let {
-                        val temperature = it.main.temp
+                    val weath = response.body()
+                    weath?.let {
+                        val weather = it.main.temp
                         val description = it.weather.firstOrNull()?.description ?: "No description"
                         val humidity = it.main.humidity
                         val locationName = it.name
 
-                        updateWeatherUI(temperature, description, humidity, locationName)
-                        saveWeatherToCache(temperature, description, humidity, locationName)
+                        updateWeatherUI(weather, description, humidity, locationName)
+                        saveWeatherToCache(weather, description, humidity, locationName)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
@@ -153,13 +151,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     }
 
     private fun updateWeatherUI(
-        temperature: Double,
+        weather: Double,
         description: String,
         humidity: Int,
         locationName: String
     ) {
-        val formattedTemp = String.format("%.2f", temperature)
-        tvTemperature.text = "$formattedTemp°C"
+        val formattedTemp = String.format("%.2f", weather)
+        tvWeather.text = "$formattedTemp°C"
         tvDescription.text = description
         tvHumidity.text = "Humidity: $humidity%"
         tvLocation.text = locationName
@@ -174,10 +172,10 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     }
 
 
-    private fun saveWeatherToCache(temperature: Double, description: String, humidity: Int, locationName: String) {
+    private fun saveWeatherToCache(weather: Double, description: String, humidity: Int, locationName: String) {
         val sharedPreferences = requireContext().getSharedPreferences("weather_prefs", Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
-            putFloat("temperature", temperature.toFloat())
+            putFloat("weather", weather.toFloat())
             putString("description", description)
             putInt("humidity", humidity)
             putString("location", locationName)
@@ -187,13 +185,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private fun loadCachedWeather() {
         val sharedPreferences = requireContext().getSharedPreferences("weather_prefs", Context.MODE_PRIVATE)
-        val temperature = sharedPreferences.getFloat("temperature", Float.MIN_VALUE)
+        val weather = sharedPreferences.getFloat("weather", Float.MIN_VALUE)
         val description = sharedPreferences.getString("description", null)
         val humidity = sharedPreferences.getInt("humidity", Int.MIN_VALUE)
         val locationName = sharedPreferences.getString("location", null)
 
-        if (temperature != Float.MIN_VALUE && description != null && humidity != Int.MIN_VALUE && locationName != null) {
-            updateWeatherUI(temperature.toDouble(), description, humidity, locationName)
+        if (weather != Float.MIN_VALUE && description != null && humidity != Int.MIN_VALUE && locationName != null) {
+            updateWeatherUI(weather.toDouble(), description, humidity, locationName)
         }
     }
 
