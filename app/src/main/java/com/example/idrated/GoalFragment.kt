@@ -85,12 +85,23 @@ class GoalFragment : Fragment() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        // Get stored values for hydration calculation
         lastHydrationCalculationDate = sharedPrefs.getString("lastHydrationCalculationDate", null)
+        isHydrationCalculated = sharedPrefs.getBoolean("isHydrationCalculated", false)
 
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         if (lastHydrationCalculationDate != currentDate) {
             lastHydrationCalculationDate = currentDate
-            sharedPrefs.edit().putString("lastHydrationCalculationDate", currentDate).apply()
+            isHydrationCalculated = false  // Reset flag for the new day
+
+            // Save the new date and reset flag
+            with(sharedPrefs.edit()) {
+                putString("lastHydrationCalculationDate", currentDate)
+                putBoolean("isHydrationCalculated", false)
+                apply()
+            }
+
             getLocationAndWeather()
         }
         // Check location permissions
@@ -103,8 +114,6 @@ class GoalFragment : Fragment() {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 LOCATION_PERMISSION_REQUEST_CODE
             )
-        } else {
-            getLocationAndWeather()
         }
         // Initialize Firebase
         auth = FirebaseAuth.getInstance()
@@ -160,9 +169,15 @@ class GoalFragment : Fragment() {
                     val weather = response.body()
                     weather?.let {
                         val temperature = it.main.temp
+
+                        // Check if hydration was already calculated today
                         if (!isHydrationCalculated) {
                             calculateHydration(temperature)
-                            isHydrationCalculated = true  // Set the flag to true
+                            isHydrationCalculated = true
+
+                            // Save the state in SharedPreferences
+                            val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                            sharedPrefs.edit().putBoolean("isHydrationCalculated", true).apply()
                         }
                     }
                 } else {
@@ -173,6 +188,7 @@ class GoalFragment : Fragment() {
             }
         }
     }
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 100
@@ -525,7 +541,7 @@ class GoalFragment : Fragment() {
         val userRef = realtimeDatabase.child("users").child(userId)
         userRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                currentData.child("waterGoal").value = recommendedWaterIntake // ❗️ This might be the issue
+                currentData.child("waterGoal").value = recommendedWaterIntake
                 return Transaction.success(currentData)
             }
 
