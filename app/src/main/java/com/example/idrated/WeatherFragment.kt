@@ -26,6 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
+@Suppress("DEPRECATION")
 class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -85,6 +86,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         tvTime.text = currentTime
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

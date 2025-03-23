@@ -142,7 +142,7 @@ class ActivityLevelFragment : Fragment(R.layout.fragment_activity_level) {
                 .addOnSuccessListener {
                     // Activity level saved successfully
                 }
-                .addOnFailureListener { e ->
+                .addOnFailureListener {
                     // Handle error
                 }
         } else {

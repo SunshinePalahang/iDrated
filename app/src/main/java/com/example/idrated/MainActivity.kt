@@ -99,6 +99,8 @@ class MainActivity : AppCompatActivity() {
                         with(editor) {
                             putString("lastSavedDate", currentDate)
                             apply()
+
+                            showUrineColorAnalysisPopup()
                         }
                     }
                     editor.apply()
@@ -111,7 +113,6 @@ class MainActivity : AppCompatActivity() {
     }
     private fun resetWaterConsumed() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
-        showUrineColorAnalysisPopup()
         if (uid != null) {
             val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
 

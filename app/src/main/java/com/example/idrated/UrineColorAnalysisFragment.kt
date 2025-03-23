@@ -1,13 +1,11 @@
 package com.example.idrated
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -88,7 +86,7 @@ class UrineColorAnalysisFragment : Fragment(R.layout.fragment_urine_color_analys
             userRef.setValue(status)  // Overwrites the previous urine check value
                 .addOnSuccessListener {
                 }
-                .addOnFailureListener { e ->
+                .addOnFailureListener {
                 }
         } else {
             Toast.makeText(requireContext(), "User not authenticated.", Toast.LENGTH_SHORT).show()

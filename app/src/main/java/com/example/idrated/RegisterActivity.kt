@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.idrated.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth

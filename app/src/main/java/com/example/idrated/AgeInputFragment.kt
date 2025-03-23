@@ -96,7 +96,7 @@ class AgeInputFragment : Fragment(R.layout.fragment_age_input) {
             userRef.child("age").setValue(age)
                 .addOnSuccessListener {
                 }
-                .addOnFailureListener { e ->
+                .addOnFailureListener {
                 }
         } else {
         }

@@ -1,13 +1,11 @@
 package com.example.idrated
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -47,10 +45,6 @@ class HealthConditionFragment : Fragment(R.layout.fragment_health_condition) {
         }
     }
 
-    // Function to handle button appearance
-
-
-    // Save health condition status to Firebase Database
     private fun saveHealthConditionToDatabase(hasCondition: Boolean) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -59,7 +53,7 @@ class HealthConditionFragment : Fragment(R.layout.fragment_health_condition) {
                 .addOnSuccessListener {
                     // Successfully saved
                 }
-                .addOnFailureListener { e ->
+                .addOnFailureListener {
                     // Handle error
                 }
         } else {

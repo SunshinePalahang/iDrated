@@ -43,6 +43,7 @@ class GoalFragment : Fragment() {
     private var age: Int? = null
     private var gender: String? = null
     private var activityLevel: String? = null
+    private var urineCheck: String? = null
 
 
     // Weather API
@@ -207,6 +208,7 @@ class GoalFragment : Fragment() {
             age = snapshot.child("age").getValue(Int::class.java) ?: age
             gender = snapshot.child("gender").getValue(String::class.java) ?: gender
             activityLevel = snapshot.child("activityLevel").getValue(String::class.java) ?: activityLevel
+            urineCheck = snapshot.child("urineCheck").getValue(String::class.java) ?:  urineCheck
 
             // Save to SharedPreferences for offline access
             with(sharedPrefs.edit()) {
@@ -222,22 +224,27 @@ class GoalFragment : Fragment() {
         val age = this.age
         val gender = this.gender
         val activityLevel = this.activityLevel
+        val urineCheck = this.urineCheck
 
 
         if (age != null && gender != null && activityLevel != null) {
-            val WATER_GOAL_MEN_ADULT = 3700
-            val WATER_GOAL_WOMEN_ADULT = 2700
-            val WATER_GOAL_CHILD_4_8 = 1200
-            val WATER_GOAL_BOYS_9_13 = 2400
-            val WATER_GOAL_BOYS_14_18 = 3300
-            val WATER_GOAL_GIRLS_9_13 = 2100
-            val WATER_GOAL_GIRLS_14_18 = 2300
-            val WATER_GOAL_OLDER_MEN = 3200
-            val WATER_GOAL_OLDER_WOMEN = 2800
+            val waterGoalMenAdult = 3700
+            val waterGoalWomenAdult = 2700
+            val waterGoalChild = 1200
+            val waterGoalBoys9to13 = 2400
+            val waterGoalBoys14to18 = 3300
+            val waterGoalGirls9to13 = 2100
+            val waterGoalGirls14to18 = 2300
+            val waterGoalOlderMen = 3200
+            val waterGoalOlderWomen = 2800
 
-            val LIGHTLY_ACTIVE = 250
-            val MODERATELY_ACTIVE = 500
-            val VERY_ACTIVE = 750
+            val lightlyActive = 250
+            val moderatelyActive = 500
+            val veryActive = 750
+
+            val slightlyDehydrated = 250
+            val dehydrated = 500
+
 
             val auth = FirebaseAuth.getInstance()
             val userId = auth.currentUser?.uid
@@ -250,25 +257,25 @@ class GoalFragment : Fragment() {
 
                     if (!hasHealthCondition) {
                         recommendedWaterIntake = when {
-                            age in 1..8 -> WATER_GOAL_CHILD_4_8
+                            age in 1..8 -> waterGoalChild
                             age in 9..18 -> {
                                 when (gender) {
-                                    "Male" -> if (age <= 13) WATER_GOAL_BOYS_9_13 else WATER_GOAL_BOYS_14_18
-                                    "Female" -> if (age <= 13) WATER_GOAL_GIRLS_9_13 else WATER_GOAL_GIRLS_14_18
+                                    "Male" -> if (age <= 13) waterGoalBoys9to13 else waterGoalBoys14to18
+                                    "Female" -> if (age <= 13) waterGoalGirls9to13 else waterGoalGirls14to18
                                     else -> 0
                                 }
                             }
                             age in 19..64 -> {
                                 when (gender) {
-                                    "Male" -> WATER_GOAL_MEN_ADULT
-                                    "Female" -> WATER_GOAL_WOMEN_ADULT
+                                    "Male" -> waterGoalMenAdult
+                                    "Female" -> waterGoalWomenAdult
                                     else -> 0
                                 }
                             }
                             age >= 65 -> {
                                 when (gender) {
-                                    "Male" -> WATER_GOAL_OLDER_MEN
-                                    "Female" -> WATER_GOAL_OLDER_WOMEN
+                                    "Male" -> waterGoalOlderMen
+                                    "Female" -> waterGoalOlderWomen
                                     else -> 0
                                 }
                             }
@@ -277,9 +284,15 @@ class GoalFragment : Fragment() {
 
                         recommendedWaterIntake += when (activityLevel) {
                             "Sedentary" -> 0
-                            "Lightly Active" -> LIGHTLY_ACTIVE
-                            "Moderately Active" -> MODERATELY_ACTIVE
-                            "Highly Active" -> VERY_ACTIVE
+                            "Lightly Active" -> lightlyActive
+                            "Moderately Active" -> moderatelyActive
+                            "Highly Active" -> veryActive
+                            else -> 0
+                        }
+                        recommendedWaterIntake += when (urineCheck) {
+                            "Well-hydrated" -> 0
+                            "Slightly Dehydrated" -> slightlyDehydrated
+                            "Dehydrated" -> dehydrated
                             else -> 0
                         }
 
