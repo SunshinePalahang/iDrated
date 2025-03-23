@@ -458,19 +458,21 @@ class GoalFragment : Fragment() {
         if (userId != null) {
             val userRef = realtimeDatabase.child("users").child(userId)
 
-            userRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val currentConsumed = snapshot.child("waterConsumed").getValue(Double::class.java) ?: 0.0
-                    val currentGoal = snapshot.child("waterGoal").getValue(Double::class.java) ?: 0.0
+            viewLifecycleOwner.lifecycleScope.launch {
+                userRef.addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (view != null && isAdded) {  // Ensure Fragment is active
+                            val currentConsumed = snapshot.child("waterConsumed").getValue(Double::class.java) ?: 0.0
+                            val currentGoal = snapshot.child("waterGoal").getValue(Double::class.java) ?: 0.0
+                            updateGoalDisplay(currentGoal, currentConsumed)
+                        }
+                    }
 
-                    updateGoalDisplay(currentGoal, currentConsumed)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(requireContext(), "Failed to retrieve updates", Toast.LENGTH_SHORT).show()
-                    Log.e("Firebase", "Failed to listen for updates: ${error.message}")
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Firebase", "Failed to read value.", error.toException())
+                    }
+                })
+            }
         }
     }
 
@@ -511,10 +513,12 @@ class GoalFragment : Fragment() {
     }
 
     private fun updateGoalDisplay(goal: Double, consumed: Double) {
-        binding.goalDisplay.text = String.format("%.2f", goal)
-        binding.goalConsumed.text = String.format("%.2f", consumed)
-        updatePercentage(goal, consumed)
-        updateProgressBar(goal, consumed)
+        binding?.let {
+            it.goalDisplay.text = String.format("%.2f", goal)
+            it.goalConsumed.text = String.format("%.2f", consumed)
+            updatePercentage(goal, consumed)
+            updateProgressBar(goal, consumed)
+        } ?: Log.e("GoalFragment", "Binding is null, skipping UI update")
     }
 
     private fun updatePercentage(goal: Double, consumed: Double) {

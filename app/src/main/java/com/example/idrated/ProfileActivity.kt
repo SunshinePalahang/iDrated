@@ -18,7 +18,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var genderSpinner: Spinner
     private lateinit var activityLevelSpinner: Spinner
     private lateinit var urineCheckSpinner: Spinner
-    private lateinit var healthConditionTextView: TextView // Read-only Health Condition
+    private lateinit var healthConditionTextView: TextView
     private lateinit var saveButton: Button
     private lateinit var changeAvatarButton: Button
     private lateinit var backButton: AppCompatTextView
@@ -26,7 +26,7 @@ class ProfileActivity : AppCompatActivity() {
     private val avatarList = listOf(
         R.drawable.avatar_f1, R.drawable.avatar_m1, R.drawable.avatar_f2, R.drawable.avatar_m2
     )
-    private var selectedAvatarResId: Int? = null
+    private var selectedAvatarResId: Int = R.drawable.dflt_user // Default avatar
 
     private val database = FirebaseDatabase.getInstance().reference
     private val auth = FirebaseAuth.getInstance()
@@ -37,6 +37,13 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         initializeViews()
+
+        if (currentUser == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+            finish() // Exit activity if user is null
+            return
+        }
+
         fetchUserData()
 
         backButton.setOnClickListener { finish() }
@@ -51,7 +58,7 @@ class ProfileActivity : AppCompatActivity() {
         genderSpinner = findViewById(R.id.gender_input)
         activityLevelSpinner = findViewById(R.id.activity_level_input)
         urineCheckSpinner = findViewById(R.id.urine_check_input)
-        healthConditionTextView = findViewById(R.id.health_condition_text) // Read-only TextView
+        healthConditionTextView = findViewById(R.id.health_condition_text)
         saveButton = findViewById(R.id.save_button)
         changeAvatarButton = findViewById(R.id.change_avatar_button)
         backButton = findViewById(R.id.backButton)
@@ -88,12 +95,14 @@ class ProfileActivity : AppCompatActivity() {
                     val urineCheck = snapshot.child("urineCheck").value?.toString()
                     urineCheck?.let { setSpinnerSelection(urineCheckSpinner, it) }
 
-                    val healthCondition = snapshot.child("healthCondition").value?.toString()?.toBoolean()
-                    healthConditionTextView.text = if (healthCondition == true) "Yes" else "No" // Set read-only health status
+                    val healthCondition = snapshot.child("healthCondition").getValue(Boolean::class.java) ?: false
+                    healthConditionTextView.text = if (healthCondition) "Yes" else "No"
 
-                    selectedAvatarResId = snapshot.child("profile_avatar_res_id").value?.toString()?.toIntOrNull()
-                    profileImageView.setImageResource(selectedAvatarResId ?: R.drawable.dflt_user)
+                    selectedAvatarResId = snapshot.child("profile_avatar_res_id").getValue(Int::class.java) ?: R.drawable.dflt_user
+                    profileImageView.setImageResource(selectedAvatarResId)
                 }
+            }.addOnFailureListener {
+                Toast.makeText(this, "Failed to load user data", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -104,6 +113,8 @@ class ProfileActivity : AppCompatActivity() {
             val position = it.getPosition(value)
             if (position >= 0) {
                 spinner.setSelection(position)
+            } else {
+                spinner.setSelection(0) // Default to first option if value is invalid
             }
         }
     }
@@ -113,17 +124,17 @@ class ProfileActivity : AppCompatActivity() {
         val age = ageInput.text.toString().toIntOrNull()
 
         if (username.isEmpty() || age == null || age <= 0) {
-            Toast.makeText(this, "Please fill out all fields correctly", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter a valid username and age", Toast.LENGTH_SHORT).show()
             return
         }
 
         val userData = mapOf(
             "username" to username,
             "age" to age,
-            "gender" to genderSpinner.selectedItem.toString(),
-            "activityLevel" to activityLevelSpinner.selectedItem.toString(),
-            "urineCheck" to urineCheckSpinner.selectedItem.toString(),
-            "profile_avatar_res_id" to (selectedAvatarResId ?: R.drawable.dflt_user)
+            "gender" to (genderSpinner.selectedItem?.toString() ?: "Male"),
+            "activityLevel" to (activityLevelSpinner.selectedItem?.toString() ?: "Sedentary"),
+            "urineCheck" to (urineCheckSpinner.selectedItem?.toString() ?: "Well-hydrated"),
+            "profile_avatar_res_id" to selectedAvatarResId
         )
 
         currentUser?.let { user ->
@@ -150,8 +161,8 @@ class ProfileActivity : AppCompatActivity() {
 
         val avatarAdapter = AvatarAdapter(avatarList) { selectedAvatar ->
             selectedAvatarResId = selectedAvatar
-            dialog.dismiss()
             profileImageView.setImageResource(selectedAvatar)
+            dialog.dismiss()
         }
 
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
