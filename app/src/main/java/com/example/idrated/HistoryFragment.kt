@@ -55,6 +55,7 @@ class HistoryFragment : Fragment() {
                         historyList.add(historyItem)
                     }
                 }
+                historyList.sortByDescending { it.dateTime } // Sort history by latest first
                 adapter.notifyDataSetChanged()
             }
 

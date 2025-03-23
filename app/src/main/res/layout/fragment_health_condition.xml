@@ -8,18 +8,19 @@
     android:padding="10dp">
 
     <!-- Caption TextView -->
+
+    <!-- ImageView -->
     <TextView
         android:id="@+id/healthCaptionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="@font/poppins"
         android:text="Do you have any health conditions that affect hydration?"
         android:textColor="@android:color/black"
         android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="20dp"
-        android:fontFamily="@font/poppins" />
+        android:textStyle="bold" />
 
-    <!-- ImageView -->
     <ImageView
         android:id="@+id/healthImageView"
         android:layout_width="match_parent"
