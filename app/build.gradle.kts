@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
-    alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.gms.google-services") // Apply Google services plugin here
+    id("org.jetbrains.kotlin.android") // Corrected the alias usage
+    id("com.google.gms.google-services") // Apply Google services plugin
 }
 
 android {
@@ -56,34 +56,38 @@ android {
     }
 }
 
+
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
+        implementation(libs.androidx.core.ktx)
+        implementation(libs.androidx.appcompat)
+        implementation(libs.material)
+        implementation(libs.androidx.activity)
+        implementation(libs.androidx.constraintlayout)
 
-    // Add Volley library if you need it for custom network operations (optional)
-    implementation(libs.volley)
+        // Add Volley library if you need it for custom network operations (optional)
+        implementation(libs.volley)
 
-    // Firebase Authentication, Firestore, Realtime Database, and Analytics
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.google.firebase.analytics)
-    implementation(libs.com.google.firebase.firebase.database)
-    implementation(libs.play.services.location)
+        // Firebase Authentication, Firestore, Realtime Database, and Analytics
+        implementation(libs.firebase.auth)
+        implementation(libs.firebase.firestore)
+        implementation(platform(libs.firebase.bom))
+        implementation(libs.google.firebase.analytics)
+        implementation(libs.com.google.firebase.firebase.database)
+        implementation(libs.play.services.location)
 
-    // Retrofit and Gson Converter
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.firebase.storage.ktx)
+        // Retrofit and Gson Converter
+        implementation(libs.retrofit)
+        implementation(libs.converter.gson)
+        implementation(libs.firebase.storage.ktx)
 
-    // Picasso
-    implementation(libs.picasso)
+        // Picasso
+        implementation(libs.picasso)
 
-    // Test dependencies
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+        // Lottie Animation Library (Fixed Syntax)
+        implementation(libs.lottie)
+
+        // Test dependencies
+        testImplementation(libs.junit)
+        androidTestImplementation(libs.androidx.junit)
+        androidTestImplementation(libs.androidx.espresso.core)
 }
