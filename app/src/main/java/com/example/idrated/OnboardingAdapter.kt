@@ -6,7 +6,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 
 class OnboardingAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
     override fun getItemCount(): Int {
-        return 6 // Total onboarding steps
+        return 7 // Total onboarding steps
     }
 
     override fun createFragment(position: Int): Fragment {
@@ -15,7 +15,8 @@ class OnboardingAdapter(activity: FragmentActivity) : FragmentStateAdapter(activ
             1 -> AgeInputFragment()
             2 -> GenderInputFragment()
             3 -> ActivityLevelFragment()
-            4 -> HealthConditionFragment()
+            4 -> UrineColorAnalysisFragment()
+            5 -> HealthConditionFragment()
             else -> HydrationTipFragment() // Last step
         }
     }

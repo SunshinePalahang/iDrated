@@ -1,6 +1,5 @@
 package com.example.idrated
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.idrated.databinding.ActivityAboutUsBinding

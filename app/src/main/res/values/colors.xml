@@ -14,6 +14,9 @@
     <color name="mainBG">#98B9F2</color>
     <color name="button">#4c8acd</color>
     <color name="buttonDarker">#306BAC</color>
+    <color name="urine_light">#FFFACD</color> <!-- Light Yellow -->
+    <color name="urine_moderate">#FFD700</color> <!-- Moderate Yellow -->
+    <color name="urine_dark">#DAA520</color> <!-- Dark Yellow -->
     #306BAC
 
     <color name="transparent">#00000000</color>

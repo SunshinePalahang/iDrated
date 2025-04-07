@@ -39,9 +39,12 @@ import com.google.firebase.database.FirebaseDatabase
 
 class GoalFragment : Fragment() {
     // User Data
+    private var username: String? = null
     private var age: Int? = null
     private var gender: String? = null
     private var activityLevel: String? = null
+    private var urineCheck: String? = null
+
 
     // Weather API
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -64,6 +67,8 @@ class GoalFragment : Fragment() {
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
 
+    private var isHydrationCalculated = false
+    private var lastHydrationCalculationDate: String? = null
     //Hydration Goal
     private var recommendedWaterIntake = 2000 // Default to 2L if user has a health condition
 
@@ -80,7 +85,26 @@ class GoalFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
+        // Get stored values for hydration calculation
+        lastHydrationCalculationDate = sharedPrefs.getString("lastHydrationCalculationDate", null)
+        isHydrationCalculated = sharedPrefs.getBoolean("isHydrationCalculated", false)
+
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        if (lastHydrationCalculationDate != currentDate) {
+            lastHydrationCalculationDate = currentDate
+            isHydrationCalculated = false  // Reset flag for the new day
+
+            // Save the new date and reset flag
+            with(sharedPrefs.edit()) {
+                putString("lastHydrationCalculationDate", currentDate)
+                putBoolean("isHydrationCalculated", false)
+                apply()
+            }
+
+            getLocationAndWeather()
+        }
         // Check location permissions
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -91,8 +115,6 @@ class GoalFragment : Fragment() {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 LOCATION_PERMISSION_REQUEST_CODE
             )
-        } else {
-            getLocationAndWeather()
         }
         // Initialize Firebase
         auth = FirebaseAuth.getInstance()
@@ -129,8 +151,6 @@ class GoalFragment : Fragment() {
                 val latitude = location.latitude
                 val longitude = location.longitude
                 fetchWeatherData(latitude, longitude)
-            } else {
-                Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -150,57 +170,53 @@ class GoalFragment : Fragment() {
                     val weather = response.body()
                     weather?.let {
                         val temperature = it.main.temp
-                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val currentDate = sdf.format(Date())
-                        val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-                        val lastSavedDate = sharedPrefs.getString("lastSavedDate", "")
 
-                        if (currentDate != lastSavedDate) {
-                            resetWaterConsumed()
-                            with(sharedPrefs.edit()) {
-                                putString("lastSavedDate", currentDate)
-                                apply()
-                            }
+                        // Check if hydration was already calculated today
+                        if (!isHydrationCalculated) {
+                            calculateHydration(temperature)
+                            isHydrationCalculated = true
+
+                            // Save the state in SharedPreferences
+                            val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                            sharedPrefs.edit().putBoolean("isHydrationCalculated", true).apply()
                         }
-
-                        calculateHydration(temperature)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Exception: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Offline Mode", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun resetWaterConsumed() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
-        val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
-
-        userRef.child("waterConsumed").setValue(0)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Water consumption has been reset.", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(requireContext(), "Error resetting water consumption: ${exception.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 100
     }
 
     private fun getUserDataFromDatabase() {
+        val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        // Load locally stored data first
+        username = sharedPrefs.getString("username", null)
+
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         val userRef = FirebaseDatabase.getInstance().getReference("users/$uid")
 
         userRef.get().addOnSuccessListener { snapshot ->
-            age = snapshot.child("age").getValue(Int::class.java)
-            gender = snapshot.child("gender").getValue(String::class.java)
-            activityLevel = snapshot.child("activityLevel").getValue(String::class.java)
+            username = snapshot.child("username").getValue(String::class.java) ?: username
+            age = snapshot.child("age").getValue(Int::class.java) ?: age
+            gender = snapshot.child("gender").getValue(String::class.java) ?: gender
+            activityLevel = snapshot.child("activityLevel").getValue(String::class.java) ?: activityLevel
+            urineCheck = snapshot.child("urineCheck").getValue(String::class.java) ?:  urineCheck
+
+            // Save to SharedPreferences for offline access
+            with(sharedPrefs.edit()) {
+                putString("username", username)
+                apply()
+            }
         }.addOnFailureListener {
-            Toast.makeText(requireContext(), "Failed to fetch user data.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Offline Mode: Using stored data", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -208,21 +224,27 @@ class GoalFragment : Fragment() {
         val age = this.age
         val gender = this.gender
         val activityLevel = this.activityLevel
+        val urineCheck = this.urineCheck
+
 
         if (age != null && gender != null && activityLevel != null) {
-            val WATER_GOAL_MEN_ADULT = 3700
-            val WATER_GOAL_WOMEN_ADULT = 2700
-            val WATER_GOAL_CHILD_4_8 = 1200
-            val WATER_GOAL_BOYS_9_13 = 2400
-            val WATER_GOAL_BOYS_14_18 = 3300
-            val WATER_GOAL_GIRLS_9_13 = 2100
-            val WATER_GOAL_GIRLS_14_18 = 2300
-            val WATER_GOAL_OLDER_MEN = 3200
-            val WATER_GOAL_OLDER_WOMEN = 2800
+            val waterGoalMenAdult = 3700
+            val waterGoalWomenAdult = 2700
+            val waterGoalChild = 1200
+            val waterGoalBoys9to13 = 2400
+            val waterGoalBoys14to18 = 3300
+            val waterGoalGirls9to13 = 2100
+            val waterGoalGirls14to18 = 2300
+            val waterGoalOlderMen = 3200
+            val waterGoalOlderWomen = 2800
 
-            val LIGHTLY_ACTIVE = 250
-            val MODERATELY_ACTIVE = 500
-            val VERY_ACTIVE = 750
+            val lightlyActive = 250
+            val moderatelyActive = 500
+            val veryActive = 750
+
+            val slightlyDehydrated = 250
+            val dehydrated = 500
+
 
             val auth = FirebaseAuth.getInstance()
             val userId = auth.currentUser?.uid
@@ -235,25 +257,25 @@ class GoalFragment : Fragment() {
 
                     if (!hasHealthCondition) {
                         recommendedWaterIntake = when {
-                            age in 1..8 -> WATER_GOAL_CHILD_4_8
+                            age in 1..8 -> waterGoalChild
                             age in 9..18 -> {
                                 when (gender) {
-                                    "Male" -> if (age <= 13) WATER_GOAL_BOYS_9_13 else WATER_GOAL_BOYS_14_18
-                                    "Female" -> if (age <= 13) WATER_GOAL_GIRLS_9_13 else WATER_GOAL_GIRLS_14_18
+                                    "Male" -> if (age <= 13) waterGoalBoys9to13 else waterGoalBoys14to18
+                                    "Female" -> if (age <= 13) waterGoalGirls9to13 else waterGoalGirls14to18
                                     else -> 0
                                 }
                             }
                             age in 19..64 -> {
                                 when (gender) {
-                                    "Male" -> WATER_GOAL_MEN_ADULT
-                                    "Female" -> WATER_GOAL_WOMEN_ADULT
+                                    "Male" -> waterGoalMenAdult
+                                    "Female" -> waterGoalWomenAdult
                                     else -> 0
                                 }
                             }
                             age >= 65 -> {
                                 when (gender) {
-                                    "Male" -> WATER_GOAL_OLDER_MEN
-                                    "Female" -> WATER_GOAL_OLDER_WOMEN
+                                    "Male" -> waterGoalOlderMen
+                                    "Female" -> waterGoalOlderWomen
                                     else -> 0
                                 }
                             }
@@ -262,9 +284,15 @@ class GoalFragment : Fragment() {
 
                         recommendedWaterIntake += when (activityLevel) {
                             "Sedentary" -> 0
-                            "Lightly Active" -> LIGHTLY_ACTIVE
-                            "Moderately Active" -> MODERATELY_ACTIVE
-                            "Highly Active" -> VERY_ACTIVE
+                            "Lightly Active" -> lightlyActive
+                            "Moderately Active" -> moderatelyActive
+                            "Highly Active" -> veryActive
+                            else -> 0
+                        }
+                        recommendedWaterIntake += when (urineCheck) {
+                            "Well-hydrated" -> 0
+                            "Slightly Dehydrated" -> slightlyDehydrated
+                            "Dehydrated" -> dehydrated
                             else -> 0
                         }
 
@@ -272,7 +300,6 @@ class GoalFragment : Fragment() {
                             recommendedWaterIntake += 500
                         }
                     }
-
                     userRef.runTransaction(object : Transaction.Handler {
                         override fun doTransaction(currentData: MutableData): Transaction.Result {
                             currentData.child("waterGoal").value = recommendedWaterIntake
@@ -444,19 +471,21 @@ class GoalFragment : Fragment() {
         if (userId != null) {
             val userRef = realtimeDatabase.child("users").child(userId)
 
-            userRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val currentConsumed = snapshot.child("waterConsumed").getValue(Double::class.java) ?: 0.0
-                    val currentGoal = snapshot.child("waterGoal").getValue(Double::class.java) ?: 0.0
+            viewLifecycleOwner.lifecycleScope.launch {
+                userRef.addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (view != null && isAdded) {  // Ensure Fragment is active
+                            val currentConsumed = snapshot.child("waterConsumed").getValue(Double::class.java) ?: 0.0
+                            val currentGoal = snapshot.child("waterGoal").getValue(Double::class.java) ?: 0.0
+                            updateGoalDisplay(currentGoal, currentConsumed)
+                        }
+                    }
 
-                    updateGoalDisplay(currentGoal, currentConsumed)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(requireContext(), "Failed to retrieve updates", Toast.LENGTH_SHORT).show()
-                    Log.e("Firebase", "Failed to listen for updates: ${error.message}")
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Firebase", "Failed to read value.", error.toException())
+                    }
+                })
+            }
         }
     }
 
@@ -497,10 +526,12 @@ class GoalFragment : Fragment() {
     }
 
     private fun updateGoalDisplay(goal: Double, consumed: Double) {
-        binding.goalDisplay.text = String.format("%.2f", goal)
-        binding.goalConsumed.text = String.format("%.2f", consumed)
-        updatePercentage(goal, consumed)
-        updateProgressBar(goal, consumed)
+        binding?.let {
+            it.goalDisplay.text = String.format("%.2f", goal)
+            it.goalConsumed.text = String.format("%.2f", consumed)
+            updatePercentage(goal, consumed)
+            updateProgressBar(goal, consumed)
+        } ?: Log.e("GoalFragment", "Binding is null, skipping UI update")
     }
 
     private fun updatePercentage(goal: Double, consumed: Double) {
@@ -527,7 +558,7 @@ class GoalFragment : Fragment() {
         val userRef = realtimeDatabase.child("users").child(userId)
         userRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                currentData.child("waterGoal").value = recommendedWaterIntake // ❗️ This might be the issue
+                currentData.child("waterGoal").value = recommendedWaterIntake
                 return Transaction.success(currentData)
             }
 

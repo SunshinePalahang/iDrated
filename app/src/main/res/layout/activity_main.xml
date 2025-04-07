@@ -60,6 +60,7 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+
     <!-- Fragment Container -->
     <FrameLayout
         android:id="@+id/fragment_container"

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popupContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/textUrineCheckTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Your Urine Color"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="2"
+        android:layout_gravity="center">
+
+        <Button
+            android:id="@+id/veryLightButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:backgroundTint="@color/urine_light"
+            android:text="1"
+            android:textColor="@android:color/black"
+            android:layout_margin="8dp"/>
+
+        <Button
+            android:id="@+id/lightButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:backgroundTint="@color/urine_moderate"
+            android:text="2"
+            android:textColor="@android:color/black"
+            android:layout_margin="8dp"/>
+
+        <Button
+            android:id="@+id/mediumButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:backgroundTint="@color/urine_dark"
+            android:text="3"
+            android:textColor="@android:color/black"
+            android:layout_margin="8dp"/>
+    </GridLayout>
+
+    <ImageView
+        android:id="@+id/urineImageView"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/hydrationStatusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Hydration Status:"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/hydrationDescriptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:gravity="center"/>
+
+</LinearLayout>

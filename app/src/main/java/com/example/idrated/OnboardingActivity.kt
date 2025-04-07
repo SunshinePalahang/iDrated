@@ -23,21 +23,21 @@ class OnboardingActivity : AppCompatActivity() {
 
         viewPager = findViewById(R.id.viewPager)
         viewPager.adapter = OnboardingAdapter(this)
-
         viewPager.isUserInputEnabled = false
 
         nextButton = findViewById(R.id.nextButton)
         backButton = findViewById(R.id.backButton)
+
         updateButtonState(viewPager.currentItem)
 
         nextButton.setOnClickListener {
             val currentItem = viewPager.currentItem
-            if (currentItem < 5) { // Updated to include the last fragment
-                onSaveListener?.invoke() // Notify the fragment to save data
+            if (currentItem < 6) { // Updated for 7 steps
+                onSaveListener?.invoke() // Notify fragment to save data
                 viewPager.currentItem = currentItem + 1
                 updateButtonState(currentItem + 1)
             } else {
-                navigateToMainActivity() // Changed method name here
+                navigateToMainActivity() // Redirects to the main app
             }
         }
 
@@ -64,14 +64,14 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
-        // Initialize interaction states for all pages
-        for (i in 0..4) userInputStates[i] = false // Require interaction on pages 0-3
-        userInputStates[5] = true // Mark the last page as already interacted
+        // Initialize interaction states for all pages (Require interaction for input pages)
+        for (i in 0..5) userInputStates[i] = false
+        userInputStates[6] = true // The last page is marked as completed by default
     }
 
     private fun updateButtonState(currentPage: Int) {
         backButton.isEnabled = currentPage > 0
-        nextButton.text = if (currentPage == 5) "Get Started" else ">"
+        nextButton.text = if (currentPage == 6) "Get Started" else ">"
         nextButton.isEnabled = userInputStates[currentPage] == true
     }
 
@@ -84,7 +84,6 @@ class OnboardingActivity : AppCompatActivity() {
         onSaveListener = listener
     }
 
-    // Change the method to navigate to MainActivity after the onboarding process
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
