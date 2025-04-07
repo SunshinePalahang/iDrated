@@ -14,6 +14,16 @@
         android:background="#87CEEB">
 
         <!-- White Box -->
+
+        <Button
+            android:id="@+id/offlineButton"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="650dp"
+            android:backgroundTint="#006bb3"
+            android:text="Offline"
+            android:textColor="#FFFFFF" />
+
         <androidx.cardview.widget.CardView
             android:id="@+id/whiteBox"
             android:layout_width="600dp"
@@ -119,5 +129,7 @@
                     android:fontFamily="@font/poppins" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
+
+
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

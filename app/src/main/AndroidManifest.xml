@@ -10,13 +10,17 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Permissions for storage access -->
+    <!-- You can request these permissions if targeting devices with SDK 32 or lower -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- Permission for camera access -->
     <uses-permission android:name="android.permission.CAMERA"
         tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"
-        tools:ignore="ScopedStorage" />
 
     <uses-permission android:name="android.permission.VIBRATE"/>
 
@@ -45,16 +49,24 @@
             android:name=".LoginActivity"
             android:exported="false" />
 
+        <!-- GoalActivity -->
+        <activity
+            android:name=".GoalActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".WaterInputActivity"
+            android:exported="true" />
+
         <!-- RegisterActivity -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
 
-        <!-- TermsandConditionActivity -->
+        <!-- Terms and Conditions Activity -->
         <activity
             android:name=".TandCActivity"
             android:exported="false" />
-
 
         <!-- OnboardingActivity -->
         <activity

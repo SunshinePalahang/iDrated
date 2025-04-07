@@ -29,28 +29,31 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance()  // Initialize Realtime Database
+        db = FirebaseDatabase.getInstance()
 
-        // Check Bluetooth state and request permission if needed
         checkBluetoothState()
 
-        // Login button logic
         binding.loginButton.setOnClickListener {
             val email = binding.emailInput.text.toString()
             val password = binding.passwordInput.text.toString()
             loginUser(email, password)
         }
 
-        // Register link logic
         binding.registerLink.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
-        // Toggle password visibility
         binding.showHidePasswordIcon.setOnClickListener {
             togglePasswordVisibility()
         }
+
+        // 🚀 Offline button logic
+        binding.offlineButton.setOnClickListener {
+            Toast.makeText(this, "Offline mode activated", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, GoalActivity::class.java))
+        }
     }
+
 
     private fun checkBluetoothState() {
         if (bluetoothAdapter == null) {

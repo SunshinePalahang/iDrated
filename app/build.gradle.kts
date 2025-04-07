@@ -86,8 +86,12 @@ dependencies {
         // Lottie Animation Library (Fixed Syntax)
         implementation(libs.lottie)
 
-        // Test dependencies
+        implementation("com.google.code.gson:gson:2.10.1")
+
+
+    // Test dependencies
         testImplementation(libs.junit)
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
+
 }
