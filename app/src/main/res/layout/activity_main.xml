@@ -7,6 +7,15 @@
     android:paddingTop="10dp"
     android:textAlignment="center"
     tools:context=".MainActivity">
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/colorAccent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp" />
 
     <!-- Header with username, profile icon, and time -->
     <LinearLayout
@@ -59,7 +68,6 @@
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
-
 
     <!-- Fragment Container -->
     <FrameLayout
