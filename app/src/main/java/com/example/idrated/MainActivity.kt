@@ -1,6 +1,7 @@
 package com.example.idrated
 
 import SettingsFragment
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.idrated.databinding.ActivityMainBinding
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
@@ -46,6 +48,14 @@ class MainActivity : AppCompatActivity() {
 
         // Fetch user data
         fetchUserData()
+
+        val fab = findViewById<FloatingActionButton>(R.id.fab)
+        fab.setOnClickListener {
+            val intent = Intent(this, GoalActivity::class.java)
+            startActivity(intent)
+        }
+
+
 
         // Initialize the default fragment
         if (savedInstanceState == null) {
