@@ -424,7 +424,6 @@ class GoalFragment : Fragment() {
             startReadingData()
         } catch (e: Exception) {
             Log.e("Bluetooth", "Connection failed: ${e.message}")
-            closeBluetoothConnection()
             Toast.makeText(requireContext(), "Connection failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -434,27 +433,44 @@ class GoalFragment : Fragment() {
         Thread {
             try {
                 val buffer = ByteArray(1024)
+                var partialData = ""
+
                 while (isConnected) {
                     val bytesRead = inputStream?.read(buffer)
                     if (bytesRead != null && bytesRead > 0) {
-                        val receivedData = String(buffer, 0, bytesRead).trim()
-                        handler.post {
-                            if (binding != null && isAdded && context != null) {
-                                binding.receivedDataTextView.text = "Received: $receivedData"
-                            } else {
-                                Log.e("Bluetooth", "Fragment not attached, skipping UI update.")
-                                return@post
-                            }
+                        val receivedChunk = String(buffer, 0, bytesRead)
+                        partialData += receivedChunk
 
-                            val waterIntake = receivedData.toDoubleOrNull()
-                            if (waterIntake == null) {
-                                Log.e("Bluetooth", "Invalid data received: $receivedData")
-                                return@post
-                            }
+                        val lines = partialData.split("\n")
+                        partialData = if (partialData.endsWith("\n")) "" else lines.last()
 
-                            if (waterIntake > 0) {
-                                addToWaterConsumed(waterIntake)
-                                updateWaterConsumed(waterIntake) // Make sure to remove this if it's unnecessary
+                        for (i in 0 until lines.size - 1) {
+                            val line = lines[i].trim()
+
+                            handler.post {
+                                if (binding != null && isAdded && context != null) {
+                                    binding.receivedDataTextView.text = "Received: $line"
+                                } else {
+                                    Log.e("Bluetooth", "Fragment not attached, skipping UI update.")
+                                    return@post
+                                }
+
+                                val value = line.toDoubleOrNull()
+                                if (value == null) {
+                                    Log.e("Bluetooth", "Invalid data received: $line")
+                                    return@post
+                                }
+
+                                if (value > 50) {
+                                    // It's likely water intake
+                                    val waterIntake = value
+                                    addToWaterConsumed(waterIntake)
+                                    updateWaterConsumed(waterIntake)
+                                } else {
+                                    // It's likely temperature
+                                    val waterTemp = value
+                                    updateWaterTemperature(waterTemp)
+                                }
                             }
                         }
                     }
@@ -466,6 +482,10 @@ class GoalFragment : Fragment() {
         }.start()
     }
 
+    private fun updateWaterTemperature(waterTemp: Double) {
+        Log.d("Bluetooth", "Water Temp: $waterTemp °C")
+        binding.waterTempTextView.text = "Temp: $waterTemp °C"
+    }
     private fun observeWaterConsumedUpdates() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
@@ -636,20 +656,8 @@ class GoalFragment : Fragment() {
         }
     }
 
-    private fun closeBluetoothConnection() {
-        try {
-            inputStream?.close()
-            bluetoothSocket?.close()
-            isConnected = false
-            binding.deviceNameTextView.text = "Disconnected"
-        } catch (e: Exception) {
-            Log.e("Bluetooth", "Error closing connection: ${e.message}")
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
-        closeBluetoothConnection()
         _binding = null
     }
 }
