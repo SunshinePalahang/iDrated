@@ -86,7 +86,7 @@ dependencies {
         // Lottie Animation Library (Fixed Syntax)
         implementation(libs.lottie)
 
-        implementation("com.google.code.gson:gson:2.10.1")
+        implementation("com.google.code.gson:gson:2.13.0")
 
 
     // Test dependencies
