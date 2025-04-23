@@ -106,13 +106,21 @@ class MainActivity : AppCompatActivity() {
 
                     if (currentDate != lastSavedDate) {
                         resetWaterConsumed()
+
+                        val hasSeenPopup = sharedPreferences.getBoolean("hasSeenPopup", false)
+                        if (hasSeenPopup) {
+                            showUrineColorAnalysisPopup()
+                        } else {
+                            // Mark that the user has now seen it to avoid future popups
+                            editor.putBoolean("hasSeenPopup", true)
+                        }
+
                         with(editor) {
                             putString("lastSavedDate", currentDate)
                             apply()
-
-                            showUrineColorAnalysisPopup()
                         }
                     }
+
                     editor.apply()
                     updateUserData(storedUsername, storedProfileAvatarResId)
                 }

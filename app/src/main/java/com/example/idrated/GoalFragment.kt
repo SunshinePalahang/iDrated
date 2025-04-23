@@ -92,7 +92,7 @@ class GoalFragment : Fragment() {
         isHydrationCalculated = sharedPrefs.getBoolean("isHydrationCalculated", false)
 
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        if (lastHydrationCalculationDate != currentDate) {
+        if (lastHydrationCalculationDate == null || lastHydrationCalculationDate != currentDate) {
             lastHydrationCalculationDate = currentDate
             isHydrationCalculated = false  // Reset flag for the new day
 
@@ -189,7 +189,6 @@ class GoalFragment : Fragment() {
             }
         }
     }
-
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 100

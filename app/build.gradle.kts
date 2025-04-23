@@ -1,17 +1,17 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android") // Corrected the alias usage
-    id("com.google.gms.google-services") // Apply Google services plugin
+    id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.idrated"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.idrated"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 35 // Updated to match compileSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -30,20 +30,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17 // Updated to Java 17
+        targetCompatibility = JavaVersion.VERSION_17 // Updated to Java 17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17" // Updated to Java 17
     }
 
-    // Enable ViewBinding
     buildFeatures {
         viewBinding = true
     }
 
-    // Set custom APK name
     applicationVariants.all {
         outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
@@ -56,42 +54,39 @@ android {
     }
 }
 
-
 dependencies {
-        implementation(libs.androidx.core.ktx)
-        implementation(libs.androidx.appcompat)
-        implementation(libs.material)
-        implementation(libs.androidx.activity)
-        implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
 
-        // Add Volley library if you need it for custom network operations (optional)
-        implementation(libs.volley)
+    // Add Volley library if you need it for custom network operations (optional)
+    implementation(libs.volley)
 
-        // Firebase Authentication, Firestore, Realtime Database, and Analytics
-        implementation(libs.firebase.auth)
-        implementation(libs.firebase.firestore)
-        implementation(platform(libs.firebase.bom))
-        implementation(libs.google.firebase.analytics)
-        implementation(libs.com.google.firebase.firebase.database)
-        implementation(libs.play.services.location)
+    // Firebase Authentication, Firestore, Realtime Database, and Analytics
+    implementation(platform(libs.firebase.bom)) // Use BoM to manage versions
+    implementation(libs.firebase.auth) // No version needed with BoM
+    implementation(libs.firebase.firestore) // No version needed with BoM
+    implementation(libs.google.firebase.analytics) // No version needed with BoM
+    implementation(libs.com.google.firebase.firebase.database) // No version needed with BoM
+    implementation(libs.play.services.location)
 
-        // Retrofit and Gson Converter
-        implementation(libs.retrofit)
-        implementation(libs.converter.gson)
-        implementation(libs.firebase.storage.ktx)
+    // Retrofit and Gson Converter
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.firebase.storage.ktx)
 
-        // Picasso
-        implementation(libs.picasso)
+    // Picasso
+    implementation(libs.picasso)
 
-        // Lottie Animation Library (Fixed Syntax)
-        implementation(libs.lottie)
+    // Lottie Animation Library (Fixed Syntax)
+    implementation(libs.lottie)
 
-        implementation("com.google.code.gson:gson:2.13.0")
-
+    implementation("com.google.code.gson:gson:2.13.0")
 
     // Test dependencies
-        testImplementation(libs.junit)
-        androidTestImplementation(libs.androidx.junit)
-        androidTestImplementation(libs.androidx.espresso.core)
-
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
