@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ADD8E6"
+    android:paddingTop="50dp"
     tools:context=".GoalActivity">
 
     <!-- res/layout/activity_goal.xml -->
@@ -53,7 +54,7 @@
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:layout_marginLeft="70dp"
+            android:layout_marginLeft="40dp"
             android:layout_marginTop="50dp"
             android:progress="0"
             android:max="100"
