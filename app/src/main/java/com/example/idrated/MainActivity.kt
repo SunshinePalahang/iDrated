@@ -27,24 +27,11 @@ class MainActivity : AppCompatActivity() {
     private val database = FirebaseDatabase.getInstance().reference
     private lateinit var timeText: TextView
     private val handler = Handler()
-    private val timeRunnable: Runnable = object : Runnable {
-        override fun run() {
-            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val currentTime = sdf.format(Date())
-            timeText.text = currentTime
-            handler.postDelayed(this, 1000)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        timeText = findViewById(R.id.time_text)
-
-        // Start updating the time every second
-        handler.post(timeRunnable)
 
         // Fetch user data
         fetchUserData()
@@ -54,8 +41,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, GoalActivity::class.java)
             startActivity(intent)
         }
-
-
 
         // Initialize the default fragment
         if (savedInstanceState == null) {
@@ -79,6 +64,20 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
+        val bellIcon = findViewById<ImageView>(R.id.notification)
+
+        bellIcon.setOnClickListener {
+            // Set active icon
+            bellIcon.setImageResource(R.drawable.bell2)
+
+            // Deselect bottom nav items visually
+            binding.bottomNavigation.menu.setGroupCheckable(0, false, true)
+
+            // Load the NotificationFragment
+            replaceFragment(NotificationFragment())
+        }
+
     }
 
     override fun onResume() {
@@ -233,10 +232,5 @@ class MainActivity : AppCompatActivity() {
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
         transaction.replace(R.id.fragment_container, fragment)
         transaction.commit()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacks(timeRunnable)
     }
 }

@@ -51,7 +51,7 @@
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="190dp"
             android:fontFamily="monospace"
             android:text="Username"
             android:textAllCaps="true"
@@ -59,16 +59,16 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/time_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="monospace"
+        <ImageView
+            android:id="@+id/notification"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="16dp"
+            android:clickable="true"
+            android:contentDescription="Notifications"
+            android:focusable="true"
             android:gravity="end"
-            android:text="Time"
-            android:textColor="@color/colorAccent"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:src="@drawable/bell1" />
     </LinearLayout>
 
     <!-- Fragment Container -->
