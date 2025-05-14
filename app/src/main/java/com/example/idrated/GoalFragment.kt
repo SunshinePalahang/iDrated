@@ -67,8 +67,6 @@ class GoalFragment : Fragment() {
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
 
-    private var isHydrationCalculated = false
-    private var lastHydrationCalculationDate: String? = null
     //Hydration Goal
     private var recommendedWaterIntake = 2000 // Default to 2L if user has a health condition
 
@@ -87,24 +85,9 @@ class GoalFragment : Fragment() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-        // Get stored values for hydration calculation
-        lastHydrationCalculationDate = sharedPrefs.getString("lastHydrationCalculationDate", null)
-        isHydrationCalculated = sharedPrefs.getBoolean("isHydrationCalculated", false)
+        // Directly get location and weather without date check
+        getLocationAndWeather()
 
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        if (lastHydrationCalculationDate == null || lastHydrationCalculationDate != currentDate) {
-            lastHydrationCalculationDate = currentDate
-            isHydrationCalculated = false  // Reset flag for the new day
-
-            // Save the new date and reset flag
-            with(sharedPrefs.edit()) {
-                putString("lastHydrationCalculationDate", currentDate)
-                putBoolean("isHydrationCalculated", false)
-                apply()
-            }
-
-            getLocationAndWeather()
-        }
         // Check location permissions
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -116,6 +99,7 @@ class GoalFragment : Fragment() {
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         }
+
         // Initialize Firebase
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
@@ -131,6 +115,7 @@ class GoalFragment : Fragment() {
         // Fetch the stored data (age, gender, activity level, weather)
         getUserDataFromDatabase()
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -170,16 +155,7 @@ class GoalFragment : Fragment() {
                     val weather = response.body()
                     weather?.let {
                         val temperature = it.main.temp
-
-                        // Check if hydration was already calculated today
-                        if (!isHydrationCalculated) {
-                            calculateHydration(temperature)
-                            isHydrationCalculated = true
-
-                            // Save the state in SharedPreferences
-                            val sharedPrefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-                            sharedPrefs.edit().putBoolean("isHydrationCalculated", true).apply()
-                        }
+                        calculateHydration(temperature)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Error fetching weather", Toast.LENGTH_SHORT).show()
@@ -189,6 +165,7 @@ class GoalFragment : Fragment() {
             }
         }
     }
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 100
@@ -237,12 +214,12 @@ class GoalFragment : Fragment() {
             val waterGoalOlderMen = 3200
             val waterGoalOlderWomen = 2800
 
-            val lightlyActive = 250
-            val moderatelyActive = 500
-            val veryActive = 750
+            val lightlyActive = 100
+            val moderatelyActive = 250
+            val veryActive = 500
 
-            val slightlyDehydrated = 250
-            val dehydrated = 500
+            val slightlyDehydrated = 100
+            val dehydrated = 250
 
 
             val auth = FirebaseAuth.getInstance()
@@ -296,7 +273,7 @@ class GoalFragment : Fragment() {
                         }
 
                         if (temperature >= 30.0) {
-                            recommendedWaterIntake += 500
+                            recommendedWaterIntake += 250
                         }
                     }
                     userRef.runTransaction(object : Transaction.Handler {
