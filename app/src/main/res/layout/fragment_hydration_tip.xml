@@ -2,21 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="0dp">
 
     <!-- ImageView for the hydration tip -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/healthTipAnimation"
+        android:layout_width="match_parent"
+        android:layout_height="385dp"
+        android:layout_marginBottom="20dp"
+        app:lottie_rawRes="@raw/hydration_tip"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"/>
 
     <!-- TextView for the hydration tip -->
-    <ImageView
-        android:id="@+id/hydrationImage"
-        android:layout_width="wrap_content"
-        android:layout_height="400dp"
-        android:layout_marginBottom="16dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/tips" />
-
     <TextView
         android:id="@+id/hydrationTipText"
         android:layout_width="wrap_content"
