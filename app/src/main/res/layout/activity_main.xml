@@ -11,8 +11,10 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_app"
-        app:backgroundTint="@color/colorAccent"
+        android:src="@drawable/ic_offline"
+        app:maxImageSize="40dp"
+        app:tint="@null"
+        app:backgroundTint="@color/mainBG"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp" />

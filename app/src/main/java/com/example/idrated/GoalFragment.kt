@@ -209,7 +209,7 @@ class GoalFragment : Fragment() {
             activityLevel = snapshot.child("activityLevel").getValue(String::class.java) ?: activityLevel
             urineCheck = snapshot.child("urineCheck").getValue(String::class.java) ?:  urineCheck
 
-            // Save to SharedPreferences for offline access
+            // Save to SharedPreferences for ic_offline.png access
             with(sharedPrefs.edit()) {
                 putString("username", username)
                 apply()

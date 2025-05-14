@@ -11,7 +11,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#87CEEB">
+        android:background="#87CEEB"
+        tools:layout_editor_absoluteX="-68dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <!-- White Box -->
 
@@ -19,7 +21,11 @@
             android:id="@+id/offlineButton"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="56dp"
             android:layout_marginTop="650dp"
+            android:layout_marginEnd="54dp"
             android:backgroundTint="#006bb3"
             android:text="Offline"
             android:textColor="#FFFFFF" />
@@ -28,10 +34,10 @@
             android:id="@+id/whiteBox"
             android:layout_width="600dp"
             android:layout_height="400dp"
+            android:layout_centerInParent="true"
             android:layout_margin="20dp"
             app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
-            android:layout_centerInParent="true">
+            app:cardElevation="4dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -43,11 +49,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
+                    android:fontFamily="@font/poppins"
                     android:text="Welcome !"
-                    android:textSize="24sp"
                     android:textColor="#87CEEB"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/poppins"/>
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
                 <!-- Email Field with Icon -->
                 <LinearLayout
@@ -123,10 +129,10 @@
                     android:layout_below="@id/loginButton"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
+                    android:fontFamily="@font/poppins"
                     android:text="Don't have an account? Register"
                     android:textColor="#006bb3"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/poppins" />
+                    android:textSize="16sp" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
