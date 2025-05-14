@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <!-- Permissions for internet and Bluetooth -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -11,18 +12,16 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Permissions for storage access -->
-    <!-- You can request these permissions if targeting devices with SDK 32 or lower -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
-    <!-- Permission for camera access -->
-    <uses-permission android:name="android.permission.CAMERA"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" /> <!-- Permission for camera access -->
+    <uses-permission
+        android:name="android.permission.CAMERA"
         tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
-
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -33,60 +32,47 @@
         android:theme="@style/Theme.IDrated"
         tools:ignore="ExtraText"
         tools:targetApi="31">
-
+        <activity
+            android:name=".SMSVerificationActivity"
+            android:exported="false" />
         <!-- SplashScreenActivity: Entry point of the app -->
         <activity
             android:name=".SplashScreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- LoginActivity -->
+        </activity> <!-- LoginActivity -->
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
-
-        <!-- GoalActivity -->
+            android:exported="false" /> <!-- GoalActivity -->
         <activity
             android:name=".GoalActivity"
             android:exported="true" />
-
         <activity
             android:name=".WaterInputActivity"
-            android:exported="true" />
-
-        <!-- RegisterActivity -->
+            android:exported="true" /> <!-- RegisterActivity -->
         <activity
             android:name=".RegisterActivity"
-            android:exported="false" />
-
-        <!-- Terms and Conditions Activity -->
+            android:exported="false" /> <!-- Terms and Conditions Activity -->
         <activity
             android:name=".TandCActivity"
-            android:exported="false" />
-
-        <!-- OnboardingActivity -->
+            android:exported="false" /> <!-- OnboardingActivity -->
         <activity
             android:name=".OnboardingActivity"
             android:exported="true"
-            tools:ignore="IntentFilterExportedReceiver" />
-
-        <!-- MainActivity -->
+            tools:ignore="IntentFilterExportedReceiver" /> <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true" />
-
         <activity
             android:name=".ProfileActivity"
             android:exported="true" />
-
         <activity
             android:name=".AboutUsActivity"
             android:exported="true" />
-
     </application>
 
 </manifest>
