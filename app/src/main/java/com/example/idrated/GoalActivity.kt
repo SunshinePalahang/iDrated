@@ -1,5 +1,6 @@
 package com.example.idrated
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Button
@@ -44,6 +45,14 @@ class GoalActivity : AppCompatActivity() {
         goalDisplay = findViewById(R.id.goalDisplay)
         percent = findViewById(R.id.percent)
         progressBar = findViewById(R.id.progressBar)
+
+        // Back button logic
+        val backButton = findViewById<TextView>(R.id.backButton)
+        backButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish() // Optional: closes GoalActivity so it's removed from the back stack
+        }
 
         // Load previously saved values
         loadData()
