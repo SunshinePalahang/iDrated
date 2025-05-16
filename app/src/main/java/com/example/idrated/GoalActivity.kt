@@ -1,15 +1,21 @@
 package com.example.idrated
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.Intent
-import android.os.Bundle
-import android.os.Environment
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.content.pm.PackageManager
+import android.os.*
+import android.util.Log
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.google.gson.Gson
 import java.io.File
+import java.io.InputStream
+import java.util.*
 
 class GoalActivity : AppCompatActivity() {
 
@@ -17,135 +23,261 @@ class GoalActivity : AppCompatActivity() {
     private lateinit var addWaterButton: Button
     private lateinit var goalInput: EditText
     private lateinit var goalButton: Button
+    private lateinit var connectButton: Button
     private lateinit var goalConsumed: TextView
     private lateinit var goalDisplay: TextView
     private lateinit var percent: TextView
     private lateinit var progressBar: ProgressBar
+    private lateinit var deviceDropdown: Spinner
 
-    // Local JSON file name
     private val fileName = "IDrated.json"
 
-    // Data structure for storage
-    data class WaterData(val amount: Float)  // Change to Float for numeric operations
-    data class GoalData(val goal: Float)
+    // Bluetooth
+    private var bluetoothAdapter: BluetoothAdapter? = null
+    private var bluetoothSocket: BluetoothSocket? = null
+    private var inputStream: InputStream? = null
+    private var isConnected = false
+    private var selectedDevice: BluetoothDevice? = null
 
-    // Combined data class to store both water and goal data
+    data class WaterData(val amount: Float)
+    data class GoalData(val goal: Float)
     data class IDratedData(val waterData: WaterData, val goalData: GoalData)
+
+    companion object {
+        private const val REQUEST_ENABLE_BT = 1
+        private const val REQUEST_CODE_BT_CONNECT = 2
+        private val DEFAULT_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_goal)
 
-        // Initialize views
-        waterInput = findViewById(R.id.waterInput)
-        addWaterButton = findViewById(R.id.addWaterButton)
+        // View Initialization
         goalInput = findViewById(R.id.GoalInput)
         goalButton = findViewById(R.id.GoalButton)
         goalConsumed = findViewById(R.id.goalConsumed)
         goalDisplay = findViewById(R.id.goalDisplay)
         percent = findViewById(R.id.percent)
         progressBar = findViewById(R.id.progressBar)
+        deviceDropdown = findViewById(R.id.deviceDropdown)
+        connectButton = findViewById(R.id.connectButton)
 
-        // Back button logic
-        val backButton = findViewById<TextView>(R.id.backButton)
-        backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish() // Optional: closes GoalActivity so it's removed from the back stack
+        findViewById<TextView>(R.id.backButton).setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
 
-        // Load previously saved values
         loadData()
+        setupBluetooth()
 
-        // Water input logic (add water and update goalConsumed)
-        addWaterButton.setOnClickListener {
-            val waterInputText = waterInput.text.toString()
-            if (waterInputText.isNotEmpty()) {
-                val waterAmount = waterInputText.toFloatOrNull()
-                if (waterAmount != null) {
-                    // Add the water input to the existing goalConsumed
-                    val updatedWaterAmount = waterAmount + (goalConsumed.text.toString().toFloatOrNull() ?: 0f)
-                    goalConsumed.text = updatedWaterAmount.toString()  // Update UI with new water consumed value
-
-                    // Save the updated water amount to JSON
-                    saveData(updatedWaterAmount, null)  // Only update the water data
-
-                    // Calculate and update percent and progress bar
-                    updateProgress(updatedWaterAmount)
-                }
-                waterInput.text.clear() // Clear input after saving
+        goalButton.setOnClickListener {
+            val goal = goalInput.text.toString().toFloatOrNull()
+            if (goal != null) {
+                saveData(null, goal)
+                goalDisplay.text = goal.toString()
+                updateProgress(goalConsumed.text.toString().toFloatOrNull() ?: 0f)
+                goalInput.text.clear()
+            } else {
+                toast("Please enter a valid goal")
             }
         }
 
-        // Goal input logic (save goal and update goalDisplay)
-        goalButton.setOnClickListener {
-            val goalInputText = goalInput.text.toString()
-            if (goalInputText.isNotEmpty()) {
-                val goalAmount = goalInputText.toFloatOrNull()
-                if (goalAmount != null) {
-                    // Save the goal input
-                    saveData(null, goalAmount)
-                    goalDisplay.text = goalInputText  // Update UI with goal value
+        connectButton.setOnClickListener {
+            selectedDevice?.let {
+                connectToDevice(it)
+            } ?: toast("No device selected")
+        }
 
-                    // Update progress when goal is set
-                    updateProgress(goalConsumed.text.toString().toFloatOrNull() ?: 0f)
-                }
-                goalInput.text.clear() // Clear input after saving
+        deviceDropdown.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val deviceName = parent.getItemAtPosition(position) as String
+                selectedDevice = getPairedDeviceByName(deviceName)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                selectedDevice = null
             }
         }
     }
 
-    // Function to save both water and goal input to a single JSON file in Downloads
-    private fun saveData(waterInputText: Float?, goalInputText: Float?) {
+    private fun setupBluetooth() {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+        if (bluetoothAdapter == null) {
+            toast("Bluetooth is not supported on this device")
+            return
+        }
+
+        if (!bluetoothAdapter!!.isEnabled) {
+            startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), REQUEST_CODE_BT_CONNECT)
+            } else {
+                populatePairedDevicesDropdown()
+            }
+        } else {
+            populatePairedDevicesDropdown()
+        }
+    }
+
+    private fun hasPermission(permission: String): Boolean {
+        return ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun toast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun populatePairedDevicesDropdown() {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+            toast("Bluetooth connect permission is required")
+            return
+        }
+
+        val devices = bluetoothAdapter?.bondedDevices?.sortedBy { it.name } ?: emptySet()
+        val deviceNames = devices.map { it.name }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, deviceNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        deviceDropdown.adapter = adapter
+    }
+
+    private fun getPairedDeviceByName(name: String): BluetoothDevice? {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) return null
+        return bluetoothAdapter?.bondedDevices?.firstOrNull { it.name == name }
+    }
+
+    private fun updateWaterIntake(value: Float) {
+        val current = goalConsumed.text.toString().toFloatOrNull() ?: 0f
+        val updated = current + value
+        goalConsumed.text = updated.toString()
+        saveData(updated, null)
+        updateProgress(updated)
+    }
+
+    private fun saveData(waterAmount: Float?, goalAmount: Float?) {
         val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val file = File(filePath, fileName)
 
-        // Get existing data (if any) and update it with new values
         val existingData = if (file.exists()) {
-            val json = file.readText()
-            Gson().fromJson(json, IDratedData::class.java)
+            Gson().fromJson(file.readText(), IDratedData::class.java)
         } else {
             IDratedData(WaterData(0f), GoalData(0f))
         }
 
-        val newWaterData = waterInputText?.let { WaterData(it) } ?: existingData.waterData
-        val newGoalData = goalInputText?.let { GoalData(it) } ?: existingData.goalData
+        val updatedWater = waterAmount?.let { WaterData(it) } ?: existingData.waterData
+        val updatedGoal = goalAmount?.let { GoalData(it) } ?: existingData.goalData
 
-        // Create new data with updated values
-        val idratedData = IDratedData(newWaterData, newGoalData)
-
-        // Save the updated data to the JSON file
-        val json = Gson().toJson(idratedData)
-        file.writeText(json)
+        val newData = IDratedData(updatedWater, updatedGoal)
+        file.writeText(Gson().toJson(newData))
     }
 
-    // Function to load both water and goal input from the single JSON file in Downloads
     private fun loadData() {
         val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val file = File(filePath, fileName)
 
         if (file.exists()) {
-            val json = file.readText()
-            val idratedData = Gson().fromJson(json, IDratedData::class.java)
-            // Display the fetched data in both goalConsumed and goalDisplay
-            goalConsumed.text = idratedData.waterData.amount.toString()
-            goalDisplay.text = idratedData.goalData.goal.toString()
-
-            // Update progress when data is loaded
-            updateProgress(idratedData.waterData.amount)
+            val data = Gson().fromJson(file.readText(), IDratedData::class.java)
+            goalConsumed.text = data.waterData.amount.toString()
+            goalDisplay.text = data.goalData.goal.toString()
+            updateProgress(data.waterData.amount)
         }
     }
 
-    // Function to update percent and progress bar
     private fun updateProgress(waterAmount: Float) {
         val goalAmount = goalDisplay.text.toString().toFloatOrNull() ?: 0f
         if (goalAmount > 0) {
-            // Calculate percent
             val percentValue = (waterAmount / goalAmount) * 100
-            percent.text = "${percentValue.toInt()}%"  // Update percent TextView
-
-            // Update ProgressBar
+            percent.text = "${percentValue.toInt()}%"
             progressBar.progress = percentValue.toInt()
+        }
+    }
+
+    private fun connectToDevice(device: BluetoothDevice) {
+        if (isConnected) {
+            toast("Already connected")
+            return
+        }
+
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+            toast("Bluetooth connect permission required")
+            return
+        }
+
+        Thread {
+            try {
+                val uuid = device.uuids?.firstOrNull()?.uuid ?: DEFAULT_UUID
+                bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid)
+                bluetoothSocket?.connect()
+                inputStream = bluetoothSocket?.inputStream
+                isConnected = true
+
+                runOnUiThread {
+                    toast("Connected to ${device.name}")
+                }
+
+                startReadingData()
+            } catch (e: Exception) {
+                Log.e("Bluetooth", "Connection failed: ${e.message}")
+                isConnected = false
+                runOnUiThread {
+                    toast("Bluetooth connection failed")
+                }
+            }
+        }.start()
+    }
+
+    private fun startReadingData() {
+        val handler = Handler(Looper.getMainLooper())
+        Thread {
+            try {
+                val buffer = ByteArray(1024)
+                var partialData = ""
+
+                while (isConnected) {
+                    val bytesRead = inputStream?.read(buffer)
+                    if (bytesRead != null && bytesRead > 0) {
+                        partialData += String(buffer, 0, bytesRead)
+                        val lines = partialData.split("\n")
+                        partialData = if (partialData.endsWith("\n")) "" else lines.last()
+
+                        for (i in 0 until lines.size - 1) {
+                            val value = lines[i].trim().toFloatOrNull()
+                            if (value != null && value > 50) {
+                                handler.post {
+                                    updateWaterIntake(value)
+                                    toast("Received $value ml via Bluetooth")
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Bluetooth", "Error reading data: ${e.message}")
+                isConnected = false
+            }
+        }.start()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_BT_CONNECT && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+            populatePairedDevicesDropdown()
+        } else {
+            toast("Bluetooth connect permission denied")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            bluetoothSocket?.close()
+        } catch (e: Exception) {
+            Log.e("Bluetooth", "Error closing socket: ${e.message}")
         }
     }
 }
