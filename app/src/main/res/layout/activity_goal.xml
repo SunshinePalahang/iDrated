@@ -114,8 +114,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
     <!-- Dropdown and Connect Button -->
     <Spinner
         android:id="@+id/deviceDropdown"
@@ -153,7 +151,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="16dp" />
 
-    <TextViewH
+    <TextView
         android:id="@+id/receivedDataTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
