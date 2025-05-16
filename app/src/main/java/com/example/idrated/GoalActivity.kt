@@ -37,10 +37,6 @@ class GoalActivity : AppCompatActivity() {
         setContentView(R.layout.activity_goal)
 
         // Initialize views
-        waterInput = findViewById(R.id.waterInput)
-        addWaterButton = findViewById(R.id.addWaterButton)
-        goalInput = findViewById(R.id.GoalInput)
-        goalButton = findViewById(R.id.GoalButton)
         goalConsumed = findViewById(R.id.goalConsumed)
         goalDisplay = findViewById(R.id.goalDisplay)
         percent = findViewById(R.id.percent)
