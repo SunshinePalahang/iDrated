@@ -1,9 +1,13 @@
 package com.example.idrated
 
+import NotificationFragment
 import SettingsFragment
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -12,26 +16,50 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.idrated.databinding.ActivityMainBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
-    private lateinit var timeText: TextView
-    private val handler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val isNewUser = sharedPreferences.getBoolean("isNewUser", true)
+
+        if (isNewUser) {
+            showMotivationalQuotePopup()
+
+            // Save registration time
+            sharedPreferences.edit().apply {
+                putBoolean("isNewUser", false)
+                putLong("registrationTime", System.currentTimeMillis())
+                apply()
+            }
+
+            // Schedule check for hydration in 2 hours
+            scheduleNewUserHydrationCheck()
+        }
+
+        val periodicRequest = PeriodicWorkRequestBuilder<HydrationReminderWorker>(15, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(this).enqueue(periodicRequest)
 
         // Fetch user data
         fetchUserData()
@@ -84,6 +112,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         fetchUserData()
     }
+
     private fun fetchUserData() {
         val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         loadUserDataFromPreferences()
@@ -128,6 +157,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun resetWaterConsumed() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid != null) {
@@ -196,7 +226,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun loadUserDataFromPreferences() {
         val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User") ?: "User"
@@ -204,12 +233,12 @@ class MainActivity : AppCompatActivity() {
 
         updateUserData(username, profileAvatarResId)
     }
+
     private fun updateUserData(username: String, avatarResId: Int?) {
         findViewById<TextView>(R.id.username).text = username
         val profileIcon = findViewById<ImageView>(R.id.profile_icon)
         profileIcon.setImageResource(avatarResId ?: R.drawable.dflt_user)
     }
-
 
     private fun updateNavigationIcons(selectedItemId: Int) {
         binding.bottomNavigation.menu.findItem(R.id.nav_weather).setIcon(R.drawable.weather1)
@@ -232,5 +261,57 @@ class MainActivity : AppCompatActivity() {
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
         transaction.replace(R.id.fragment_container, fragment)
         transaction.commit()
+    }
+
+    private fun showNotification(title: String, message: String) {
+        val channelId = "hydration_reminder_channel"
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Hydration Reminders", NotificationManager.IMPORTANCE_HIGH)
+            manager.createNotificationChannel(channel)
+        }
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSmallIcon(R.drawable.bell2)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+        manager.notify(1002, notification)
+    }
+
+    private fun showMotivationalQuotePopup() {
+        val context = this
+        val dialog = AlertDialog.Builder(context).create()
+        val inflater = LayoutInflater.from(context)
+        val layout = inflater.inflate(R.layout.motivational_quote_popup, null)
+
+        val quoteTextView = layout.findViewById<TextView>(R.id.quoteTextView)
+        val closeButton = layout.findViewById<Button>(R.id.closeButton)
+
+        val quotes = listOf(
+            "“Drink water like you love your body.”",
+            "“Every sip counts. Start now.”",
+            "“Hydrate to feel great!”",
+            "“Strong starts with water.”",
+            "“Your body’s whisper: Drink more water.”"
+        )
+
+        quoteTextView.text = quotes.random()
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.setView(layout)
+        dialog.setCancelable(false)
+        dialog.show()
+    }
+
+    private fun scheduleNewUserHydrationCheck() {
+        val workRequest = OneTimeWorkRequestBuilder<NewUserHydrationWorker>()
+            .setInitialDelay(15, TimeUnit.MINUTES)
+            .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
     }
 }

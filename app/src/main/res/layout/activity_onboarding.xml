@@ -22,7 +22,6 @@
         android:id="@+id/backButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:background="@color/darkerBackgroundColor"
         android:text="&lt;"
         android:textSize="24sp"
         android:textColor="@color/white"

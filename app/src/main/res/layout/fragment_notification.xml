@@ -1,14 +1,22 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
-        android:id="@+id/notificationText"
+        android:id="@+id/tvNoNotifications"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No new notifications"
-        android:textSize="18sp" />
+        android:text="No notifications yet"
+        android:visibility="gone"
+        android:textSize="16sp"
+        android:layout_gravity="center"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>

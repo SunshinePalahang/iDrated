@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -32,10 +33,6 @@
         android:theme="@style/Theme.IDrated"
         tools:ignore="ExtraText"
         tools:targetApi="31">
-        <activity
-            android:name=".SMSVerificationActivity"
-            android:exported="false" />
-        <!-- SplashScreenActivity: Entry point of the app -->
         <activity
             android:name=".SplashScreenActivity"
             android:exported="true">
@@ -73,6 +70,11 @@
         <activity
             android:name=".AboutUsActivity"
             android:exported="true" />
+        <service
+            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true" />
     </application>
+
 
 </manifest>
