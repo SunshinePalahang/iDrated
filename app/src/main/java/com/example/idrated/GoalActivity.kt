@@ -252,8 +252,22 @@ class GoalActivity : AppCompatActivity() {
             val percentValue = (waterAmount / goalAmount) * 100
             percent.text = "${percentValue.toInt()}%"
             progressBar.progress = percentValue.toInt()
+
+            if (percentValue >= 100) {
+                showSuccessPopup()
+            }
         }
     }
+
+    private fun showSuccessPopup() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_achieve_goal, null)
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        dialog.show()
+    }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
