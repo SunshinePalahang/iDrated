@@ -84,7 +84,8 @@
         android:layout_height="wrap_content"
         android:text="Received: None"
         android:layout_marginBottom="16dp"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:visibility="gone"/>
     <TextView
         android:id="@+id/waterTempTextView"
         android:layout_width="wrap_content"
