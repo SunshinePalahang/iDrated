@@ -123,8 +123,15 @@ class ProfileActivity : AppCompatActivity() {
         val username = usernameInput.text.toString().trim()
         val age = ageInput.text.toString().toIntOrNull()
 
-        if (username.isEmpty() || age == null || age <= 0) {
-            Toast.makeText(this, "Please enter a valid username and age", Toast.LENGTH_SHORT).show()
+        // Username length validation (must be between 6 and 8 characters)
+        if (username.length !in 6..8) {
+            Toast.makeText(this, "Username must be 6 to 8 characters long", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Age validation
+        if (age == null || age <= 0) {
+            Toast.makeText(this, "Please enter a valid age", Toast.LENGTH_SHORT).show()
             return
         }
 
