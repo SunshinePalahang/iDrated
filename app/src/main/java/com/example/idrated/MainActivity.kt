@@ -25,6 +25,8 @@ import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import androidx.core.content.edit
+import androidx.work.ExistingPeriodicWorkPolicy
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,8 +60,18 @@ class MainActivity : AppCompatActivity() {
             scheduleNewUserHydrationCheck()
         }
 
-        val periodicRequest = PeriodicWorkRequestBuilder<HydrationReminderWorker>(15, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this).enqueue(periodicRequest)
+        val workRequest = PeriodicWorkRequestBuilder<HydrationReminderWorker>(
+            2, TimeUnit.HOURS // every 2 hours
+        )
+            .setInitialDelay(0, TimeUnit.MINUTES)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "hydration_reminder",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+
 
         fetchUserData()
 
@@ -133,23 +145,23 @@ class MainActivity : AppCompatActivity() {
                 val waterConsumed = snapshot.child("waterConsumed").value?.toString()?.toIntOrNull() ?: 0
                 val waterGoal = snapshot.child("waterGoal").value?.toString()?.toIntOrNull() ?: 0
 
-                val editor = sharedPreferences.edit()
-                editor.putString("username", username)
-                avatarId?.let { editor.putInt("profile_avatar_res_id", it) }
+                sharedPreferences.edit() {
+                    putString("username", username)
+                    avatarId?.let { putInt("profile_avatar_res_id", it) }
 
-                val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                val lastSavedDate = sharedPreferences.getString("lastSavedDate", "")
-                if (today != lastSavedDate) {
-                    resetWaterConsumed()
-                    if (sharedPreferences.getBoolean("hasSeenPopup", false)) {
-                        showUrineColorAnalysisPopup()
-                    } else {
-                        editor.putBoolean("hasSeenPopup", true)
+                    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    val lastSavedDate = sharedPreferences.getString("lastSavedDate", "")
+                    if (today != lastSavedDate) {
+                        resetWaterConsumed()
+                        if (sharedPreferences.getBoolean("hasSeenPopup", false)) {
+                            showUrineColorAnalysisPopup()
+                        } else {
+                            putBoolean("hasSeenPopup", true)
+                        }
+                        putString("lastSavedDate", today)
                     }
-                    editor.putString("lastSavedDate", today)
-                }
 
-                editor.apply()
+                }
                 updateUserData(username, avatarId)
 
                 checkHydrationGoalAchievement(waterConsumed, waterGoal)

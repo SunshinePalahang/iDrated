@@ -62,6 +62,8 @@ class UsernameInputFragment : Fragment(R.layout.fragment_username_input) {
             val username = usernameInput.text.toString().trim()
             if (username.isEmpty()) {
                 Toast.makeText(context, "Please enter a username", Toast.LENGTH_SHORT).show()
+            } else if (username.length !in 6..8) {
+                Toast.makeText(context, "Username must be 6 to 8 characters long", Toast.LENGTH_SHORT).show()
             } else {
                 saveUserData(username)
             }

@@ -12,11 +12,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import androidx.core.content.edit
 
 class HydrationReminderWorker(
     appContext: Context,
@@ -29,8 +28,14 @@ class HydrationReminderWorker(
     private val gson = Gson()
 
     override suspend fun doWork(): Result {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        if (currentHour !in 6..23) return Result.success()
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = calendar.get(Calendar.MINUTE)
+
+        // Stop if outside the 6:00 AM - 11:50 PM range
+        if (currentHour < 6 || (currentHour == 23 && currentMinute > 50) || currentHour > 23) {
+            return Result.success()
+        }
 
         val user = auth.currentUser ?: return Result.success()
         val uid = user.uid
@@ -61,9 +66,15 @@ class HydrationReminderWorker(
         val timeSinceLastNotification = now - lastNotificationTime
 
         val hasStartedDrinkingToday = isToday(lastSavedTime) && lastSavedTime != 0L
-        val shouldNotify = (timeSinceLastDrink >= 15 * 60 * 1000) && (timeSinceLastNotification >= 15 * 60 * 1000)
+        val shouldNotify = (timeSinceLastDrink >= 2 * 60 * 60 * 1000) &&
+                (timeSinceLastNotification >= 2 * 60 * 60 * 1000)
 
-        if (shouldNotify) {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val lastGoalAchievedDate = sharedPreferences.getString("goalAchievedDate", "")
+        val goalAchievedToday = (waterConsumed >= waterGoal && waterGoal > 0 && lastGoalAchievedDate == today)
+
+        // ✅ Only show hydration reminder if goal not yet achieved
+        if (shouldNotify && !goalAchievedToday) {
             val message = selectNotificationMessage(isFollowUp = hasStartedDrinkingToday)
             showHydrationNotification(message)
             saveNotificationToHistory(message)
@@ -71,14 +82,12 @@ class HydrationReminderWorker(
             userRef.child("lastNotificationTime").setValue(now)
         }
 
-        // ✅ Goal Achieved Logic
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val lastGoalAchievedDate = sharedPreferences.getString("goalAchievedDate", "")
-
+        // ✅ Show goal-achieved notification once per day
         if (waterConsumed >= waterGoal && lastGoalAchievedDate != today && waterGoal > 0) {
+            val goalMessage = "🎉 You achieved your hydration goal today!"
             showGoalAchievedNotification()
-            saveNotificationToHistory("🎉 You achieved your hydration goal today!")
-            sharedPreferences.edit().putString("goalAchievedDate", today).apply()
+            saveNotificationToHistory(goalMessage)
+            sharedPreferences.edit() { putString("goalAchievedDate", today) }
         }
 
         return Result.success()
@@ -179,12 +188,18 @@ class HydrationReminderWorker(
         val history: MutableList<NotificationEntry> = gson.fromJson(json, type) ?: mutableListOf()
 
         val now = System.currentTimeMillis()
-        val isDuplicate = history.any { isToday(it.timestamp) && it.message == message }
+        val isTodayDuplicate = history.any { isToday(it.timestamp) && it.message == message }
 
-        if (isDuplicate) return // Prevent duplicate message for today
+        // Only allow goal messages once per day in history
+        val isGoalMessage = message.contains("🎉") || message.contains("goal", ignoreCase = true)
+        if (isGoalMessage && isTodayDuplicate) return
+
+        // For hydration reminders, also avoid duplicates within the day
+        if (!isGoalMessage && isTodayDuplicate) return
 
         history.add(NotificationEntry(now, message))
 
+        // Keep only today's notifications
         val todayOnly = history.filter { isToday(it.timestamp) }
 
         sharedPreferences.edit().apply {
@@ -193,7 +208,6 @@ class HydrationReminderWorker(
             apply()
         }
     }
-
 
     private fun isToday(timestamp: Long): Boolean {
         val now = Calendar.getInstance()

@@ -542,6 +542,19 @@ class GoalFragment : Fragment() {
     private fun updateProgressBar(goal: Double, consumed: Double) {
         binding.progressBar.max = goal.toInt()
         binding.progressBar.progress = consumed.toInt()
+
+        if (consumed >= goal) {
+            showSuccessPopup()
+        }
+    }
+
+    private fun showSuccessPopup() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_achieve_goal, null)
+        val dialog = android.app.AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        dialog.show()
     }
 
     private fun updateWaterConsumed(newConsumed: Double) {
@@ -560,7 +573,7 @@ class GoalFragment : Fragment() {
 
             override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
                 if (error != null) {
-                    Toast.makeText(requireContext(), "Failed to update water goal.", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(requireContext(), "Failed to update water goal.", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(requireContext(), "Water goal updated successfully.", Toast.LENGTH_SHORT).show()
 

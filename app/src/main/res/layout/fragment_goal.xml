@@ -12,7 +12,7 @@
         android:id="@+id/goalDisplayLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Daily Goal:"
+        android:text="Daily Goal (mL):"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
         android:id="@+id/goalConsumedLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Water Consumed:"
+        android:text="Water Consumed (mL):"
         android:textSize="18sp"
         android:textStyle="bold" />
 
