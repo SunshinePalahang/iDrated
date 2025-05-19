@@ -21,8 +21,6 @@ import java.util.*
 class GoalActivity : AppCompatActivity() {
 
     // Views
-    private lateinit var waterInput: EditText
-    private lateinit var addWaterButton: Button
     private lateinit var goalInput: EditText
     private lateinit var goalButton: Button
     private lateinit var connectButton: Button
