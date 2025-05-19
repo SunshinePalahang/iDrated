@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.*
+import java.text.SimpleDateFormat
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -57,6 +58,11 @@ class GoalActivity : AppCompatActivity() {
         setContentView(R.layout.activity_goal)
 
         initViews()
+
+        findViewById<Button>(R.id.historyButton).setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
+
         loadData()
         setupBluetooth()
 
@@ -220,6 +226,7 @@ class GoalActivity : AppCompatActivity() {
     private fun saveData(waterAmount: Float?, goalAmount: Float?) {
         val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val file = File(filePath, fileName)
+        val historyFile = File(filePath, "IDrated_history.json")
 
         val existingData = if (file.exists()) {
             Gson().fromJson(file.readText(), IDratedData::class.java)
@@ -229,9 +236,18 @@ class GoalActivity : AppCompatActivity() {
 
         val updatedWater = waterAmount?.let { WaterData(it) } ?: existingData.waterData
         val updatedGoal = goalAmount?.let { GoalData(it) } ?: existingData.goalData
-
         val newData = IDratedData(updatedWater, updatedGoal)
         file.writeText(Gson().toJson(newData))
+
+        if (waterAmount != null) {
+            val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+            val history = if (historyFile.exists()) {
+                Gson().fromJson(historyFile.readText(), Array<HistoryActivity.IntakeRecord>::class.java).toMutableList()
+            } else mutableListOf()
+
+            history.add(HistoryActivity.IntakeRecord(timestamp, waterAmount))
+            historyFile.writeText(Gson().toJson(history))
+        }
     }
 
     private fun loadData() {
@@ -269,7 +285,6 @@ class GoalActivity : AppCompatActivity() {
             .create()
         dialog.show()
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
