@@ -249,7 +249,9 @@ class GoalActivity : AppCompatActivity() {
     private fun updateProgress(waterAmount: Float) {
         val goalAmount = goalDisplay.text.toString().toFloatOrNull() ?: 0f
         if (goalAmount > 0) {
-            val percentValue = (waterAmount / goalAmount) * 100
+            var percentValue = (waterAmount / goalAmount) * 100
+            if (percentValue > 100f) percentValue = 100f
+
             percent.text = "${percentValue.toInt()}%"
             progressBar.progress = percentValue.toInt()
 
