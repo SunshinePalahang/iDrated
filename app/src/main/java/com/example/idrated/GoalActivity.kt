@@ -251,12 +251,27 @@ class GoalActivity : AppCompatActivity() {
     private fun loadData() {
         val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val file = File(filePath, fileName)
+        val today = getCurrentDateString()
+        val lastDate = getLastDate()
 
-        if (file.exists()) {
-            val data = Gson().fromJson(file.readText(), IDratedData::class.java)
-            goalConsumed.text = data.waterData.amount.toString()
-            goalDisplay.text = data.goalData.goal.toString()
-            updateProgress(data.waterData.amount)
+        if (lastDate != today) {
+            // New day: reset consumed water to 0 but keep the goal
+            if (file.exists()) {
+                val data = Gson().fromJson(file.readText(), IDratedData::class.java)
+                saveData(0f, data.goalData.goal)  // Reset water consumed to 0, keep goal
+            }
+            saveLastDate(today)
+            goalConsumed.text = "0"
+            // Optionally update UI progress to zero
+            updateProgress(0f)
+            goalDisplay.text = goalDisplay.text ?: "0"  // keep current goal display
+        } else {
+            if (file.exists()) {
+                val data = Gson().fromJson(file.readText(), IDratedData::class.java)
+                goalConsumed.text = data.waterData.amount.toString()
+                goalDisplay.text = data.goalData.goal.toString()
+                updateProgress(data.waterData.amount)
+            }
         }
     }
 
@@ -304,5 +319,23 @@ class GoalActivity : AppCompatActivity() {
 
     private fun toast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun getCurrentDateString(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return sdf.format(Date())
+    }
+
+    private val PREFS_NAME = "IDratedPrefs"
+    private val KEY_LAST_DATE = "last_date"
+
+    private fun saveLastDate(date: String) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs.edit().putString(KEY_LAST_DATE, date).apply()
+    }
+
+    private fun getLastDate(): String? {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        return prefs.getString(KEY_LAST_DATE, null)
     }
 }
