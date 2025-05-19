@@ -40,6 +40,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
+
         val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         val isNewUser = sharedPreferences.getBoolean("isNewUser", true)
 

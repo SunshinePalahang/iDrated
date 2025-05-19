@@ -20,6 +20,8 @@ class HydrationReminderWorker(context: Context, workerParams: WorkerParameters) 
 
     private val database = FirebaseDatabase.getInstance().reference
     private val auth = FirebaseAuth.getInstance()
+    private val sharedPreferences = applicationContext.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+    private val gson = Gson()
 
     override fun doWork(): Result {
         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -29,15 +31,19 @@ class HydrationReminderWorker(context: Context, workerParams: WorkerParameters) 
         val user = auth.currentUser ?: return Result.success()
         val uid = user.uid
         val userRef = database.child("users").child(uid)
-        val sharedPreferences = applicationContext.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
+        // Use CountDownLatch to wait for async Firebase calls
         val latch = CountDownLatch(1)
-        var shouldNotify = false
-        var lastSavedTime = 0L
 
-        // Fetch lastSavedTime from Firebase Realtime Database
-        userRef.child("lastSavedTime").get().addOnSuccessListener { snapshot ->
-            lastSavedTime = snapshot.getValue(Long::class.java) ?: 0L
+        var lastSavedTime = 0L
+        var lastNotificationTimeFirebase = 0L
+        var notificationHistoryFirebaseJson = "[]"
+
+        // Fetch data from Firebase: lastSavedTime, lastNotificationTime, notificationHistory
+        userRef.get().addOnSuccessListener { snapshot ->
+            lastSavedTime = snapshot.child("lastSavedTime").getValue(Long::class.java) ?: 0L
+            lastNotificationTimeFirebase = snapshot.child("lastNotificationTime").getValue(Long::class.java) ?: 0L
+            notificationHistoryFirebaseJson = snapshot.child("notificationHistory").getValue(String::class.java) ?: "[]"
             latch.countDown()
         }.addOnFailureListener {
             latch.countDown()
@@ -46,39 +52,53 @@ class HydrationReminderWorker(context: Context, workerParams: WorkerParameters) 
         latch.await(5, TimeUnit.SECONDS)
 
         val now = System.currentTimeMillis()
-        val lastNotificationTime = sharedPreferences.getLong("lastNotificationTime", 0L)
+        // Fallback to local lastNotificationTime if Firebase data missing or older
+        val lastNotificationTimeLocal = sharedPreferences.getLong("lastNotificationTime", 0L)
+        val lastNotificationTime = maxOf(lastNotificationTimeFirebase, lastNotificationTimeLocal)
 
         val timeSinceLastDrink = now - lastSavedTime
         val timeSinceLastNotification = now - lastNotificationTime
 
-        // Notify if 15 minutes passed since last drink
-        // and at least 15 minutes since last notification
-        if (timeSinceLastDrink >= 15 * 60 * 1000 && timeSinceLastNotification >= 15 * 60 * 1000) {
-            shouldNotify = true
-        }
-
+        val shouldNotify = (timeSinceLastDrink >= 15 * 60 * 1000) && (timeSinceLastNotification >= 15 * 60 * 1000)
         if (shouldNotify) {
-            showHydrationNotification(timeSinceLastNotification > 15 * 60 * 1000)
-            // Removed duplicate saveLastNotificationTime() here, already called inside showHydrationNotification()
+            showHydrationNotification(lastNotificationTime != 0L)
+            // Save notification time and history synced
+            saveLastNotificationTimeAndHistoryToFirebase()
         }
 
         return Result.success()
     }
 
-    // Data class for each notification entry
-    data class NotificationEntry(val timestamp: Long, val message: String)
+    // Data class for notification entry
+    data class NotificationEntry(
+        val timestamp: Long,
+        val message: String
+    )
 
-    private fun saveNotificationEntry(message: String) {
-        val sharedPreferences = applicationContext.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val gson = Gson()
+    private fun saveLastNotificationTimeAndHistoryToFirebase() {
+        val user = auth.currentUser ?: return
+        val uid = user.uid
+        val userRef = database.child("users").child(uid)
+        val now = System.currentTimeMillis()
 
-        val json = sharedPreferences.getString("notificationHistory", "[]")
+        // Load already-saved local notification history
+        val localJson = sharedPreferences.getString("notificationHistory", "[]")
         val type = object : TypeToken<MutableList<NotificationEntry>>() {}.type
-        val notifications: MutableList<NotificationEntry> = gson.fromJson(json, type) ?: mutableListOf()
+        val localNotifications: MutableList<NotificationEntry> = gson.fromJson(localJson, type) ?: mutableListOf()
 
-        notifications.add(NotificationEntry(System.currentTimeMillis(), message))
+        val notificationsJson = gson.toJson(localNotifications)
 
-        sharedPreferences.edit().putString("notificationHistory", gson.toJson(notifications)).apply()
+        // Update Firebase in one shot: lastNotificationTime and notificationHistory
+        val updates = mapOf<String, Any>(
+            "lastNotificationTime" to now,
+            "notificationHistory" to notificationsJson
+        )
+        userRef.updateChildren(updates)
+
+        // Also update local SharedPreferences time
+        sharedPreferences.edit()
+            .putLong("lastNotificationTime", now)
+            .apply()
     }
 
     private fun showHydrationNotification(isFollowUp: Boolean) {
@@ -122,12 +142,17 @@ class HydrationReminderWorker(context: Context, workerParams: WorkerParameters) 
 
         notificationManager.notify(1001, notification)
 
-        saveLastNotificationTime()
+        // Save notification in local SharedPreferences immediately so saveLastNotificationTimeAndHistoryToFirebase can read it
         saveNotificationEntry(message)
     }
 
-    private fun saveLastNotificationTime() {
-        val sharedPreferences = applicationContext.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putLong("lastNotificationTime", System.currentTimeMillis()).apply()
+    private fun saveNotificationEntry(message: String) {
+        val json = sharedPreferences.getString("notificationHistory", "[]")
+        val type = object : TypeToken<MutableList<NotificationEntry>>() {}.type
+        val notifications: MutableList<NotificationEntry> = gson.fromJson(json, type) ?: mutableListOf()
+
+        notifications.add(NotificationEntry(System.currentTimeMillis(), message))
+
+        sharedPreferences.edit().putString("notificationHistory", gson.toJson(notifications)).apply()
     }
 }

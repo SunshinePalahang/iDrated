@@ -49,6 +49,7 @@ class NotificationFragment : Fragment() {
         val json = sharedPreferences.getString("notificationHistory", "[]")
         val gson = Gson()
         val type = object : TypeToken<List<NotificationEntry>>() {}.type
-        return gson.fromJson(json, type) ?: emptyList()
+        val notifications = gson.fromJson<List<NotificationEntry>>(json, type) ?: emptyList()
+        return notifications.reversed()  // Reverse to have latest first
     }
 }
